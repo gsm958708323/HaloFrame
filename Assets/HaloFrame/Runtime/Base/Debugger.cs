@@ -11,8 +11,7 @@ namespace HaloFrame
         None, All,
         Driver,
         Manager,
-        Collider,
-        Quadtree
+        ReferencePool
     }
 
     public class Debugger : MonoSingleton<Debugger>

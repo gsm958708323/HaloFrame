@@ -123,7 +123,7 @@ namespace HaloFrame
         /// </summary>
         public void UpdateValue()
         {
-            // gsm todo 对比ChildrenCount
+            // todo 对比ChildrenCount
             int sum = 0;
             if (Childrens != null && Childrens.Count != 0)
             {
@@ -178,7 +178,7 @@ namespace HaloFrame
             RedDotNode child = GetChild(key);
             if (child != null)
             {
-                // gsm todo 先移除再刷新？
+                // todo 先移除再刷新？
                 GameManager.RedDotManager.MarkDirtyNode(this);
                 Childrens.Remove(key);
 
