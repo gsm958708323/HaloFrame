@@ -51,7 +51,8 @@ namespace HaloFrame
         }
 
         /// <summary>
-        /// 清除所有引用池。切场景时调用？？
+        /// 清除所有引用池。
+        /// todo 切场景时调用？？
         /// </summary>
         public static void ClearAll()
         {

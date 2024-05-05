@@ -25,7 +25,8 @@ namespace HaloFrame
         public int ReleaseRefCount { get; private set; }
 
         /// <summary>
-        /// 新创建的引用数量
+        /// 新创建的引用数量，可能新添加但未使用
+        /// AddRefCount >= UsingRefCount
         /// </summary>
         public int AddRefCount { get; private set; }
         /// <summary>
@@ -169,9 +170,14 @@ namespace HaloFrame
         {
             lock (refQue)
             {
-                refQue.Clear();
                 RemoveRefCount += refQue.Count;
+                refQue.Clear();
             }
+        }
+
+        public override string ToString()
+        {
+            return $"ReferenceCollection: Type: {refType.Name}, Using: {UsingRefCount}, Gets: {GetsRefCount}, Release: {ReleaseRefCount}, Add: {AddRefCount}, Remove: {RemoveRefCount}";
         }
     }
 }
