@@ -7,6 +7,7 @@ public class GameManager : GameManagerBase
 {
     public static DriverManager DriverManager;
     public static RedDotManager RedDotManager;
+    public static Dispatcher Dispatcher;
 
     protected override void InitManager()
     {
@@ -14,6 +15,7 @@ public class GameManager : GameManagerBase
 
         DriverManager = GetManager<DriverManager>();
         RedDotManager = GetManager<RedDotManager>();
+        Dispatcher = GetManager<Dispatcher>();
     }
 
     /*
