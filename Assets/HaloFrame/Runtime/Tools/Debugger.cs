@@ -12,7 +12,8 @@ namespace HaloFrame
         Driver,
         Manager,
         ReferencePool,
-        Event
+        Event,
+        UI
     }
 
     public class Debugger : MonoSingleton<Debugger>
