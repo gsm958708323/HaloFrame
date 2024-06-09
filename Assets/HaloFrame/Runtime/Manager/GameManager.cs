@@ -8,14 +8,18 @@ public class GameManager : GameManagerBase
     public static DriverManager DriverManager;
     public static RedDotManager RedDotManager;
     public static Dispatcher Dispatcher;
+    public static UIManager UIManager;
+    public static ResourceManager ResourceManager;
 
     protected override void InitManager()
     {
         base.InitManager();
 
+        Dispatcher = GetManager<Dispatcher>();
+        ResourceManager = GetManager<ResourceManager>();
         DriverManager = GetManager<DriverManager>();
         RedDotManager = GetManager<RedDotManager>();
-        Dispatcher = GetManager<Dispatcher>();
+        UIManager = GetManager<UIManager>();
     }
 
     /*
