@@ -11,6 +11,6 @@ namespace HaloFrame
         public UIViewType ViewType;
         public string Prefab;
         public UILayerType LayerType;
-        public bool isWindow;
+        public bool IsWindow; // 是否为弹窗
     }
 }

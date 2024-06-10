@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.Experimental.AI;
 
 namespace HaloFrame
 {
@@ -57,7 +56,7 @@ namespace HaloFrame
             }
 
             Assembly assembly = Assembly.GetExecutingAssembly();
-            // 初始化界面配置 todo 在编辑器上生成
+            // 初始化界面配置 todo 优化反射？在编辑器上生成
             var configList = UIConfigSO.Get();
             foreach (var item in configList)
             {
@@ -72,13 +71,13 @@ namespace HaloFrame
                     continue;
                 }
 
-                // todo 优化反射？
                 Type type = assembly.GetType(item.ViewType.ToString());
                 if (type == null)
                 {
                     Debugger.LogError($"界面对象不存在 {item.ViewType}", LogDomain.UI);
                     continue;
                 }
+                // todo 只有UIView能够复用，但是有内存泄漏的风险，考虑去掉？
                 UIViewCtrl viewCtrl = UIViewCtrl.Get(item, UIView.Get(type), layerDict[item.LayerType]);
                 ctrlDict.Add(item.ViewType, viewCtrl);
             }
@@ -94,6 +93,18 @@ namespace HaloFrame
 
             openSet.Add(type);
             ctrlDict[type].Open(data, action);
+        }
+
+        public void Close(UIViewType type, Action action = null)
+        {
+            if (!ctrlDict.ContainsKey(type))
+            {
+                Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
+                return;
+            }
+
+            openSet.Remove(type);
+            ctrlDict[type].Close(action);
         }
     }
 }

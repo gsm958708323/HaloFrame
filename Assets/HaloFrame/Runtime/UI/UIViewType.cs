@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HaloFrame
+public enum UIViewType
 {
-    public enum UIViewType
-    {
-        UITestView,
-        Max,
-    }
+    UITestFullView1,
+    UITestFullView2,
+    UITestTipsView1,
+    UITestTipsView2,
+    Max,
 }
