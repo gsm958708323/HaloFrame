@@ -24,6 +24,8 @@
 ## 重新打开界面时，是否需要调用OnClose接口？
 重复打开只需要重新设置order，并处理覆盖关系
 
+## 同一帧连续压入多个界面，如何保证顺序，先打开的先显示？
+
 ## UI生命周期
 
 OnInit - OnOpen - OnResume - OnPause - OnClose

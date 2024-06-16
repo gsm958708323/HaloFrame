@@ -50,6 +50,11 @@ namespace HaloFrame
                 gameObject.SetActive(active);
         }
 
+        public static void SetActiveScale(this GameObject gameObject, bool active)
+        {
+            gameObject.transform.localScale = active ? Vector3.one : Vector3.zero;
+        }
+
         public static void SetLayerRecursively(this GameObject gameObject, int layer)
         {
             gameObject.GetComponentsInChildren(true, s_CachedTransforms);

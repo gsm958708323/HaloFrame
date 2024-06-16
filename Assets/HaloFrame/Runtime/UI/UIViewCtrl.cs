@@ -61,7 +61,7 @@ namespace HaloFrame
                 {
                     return; // 已经在最上层，不需要再打开
                 }
-                
+
                 // 已经加载完成
                 if (isFirst == false && IsOpen && Order > 0)
                 {
@@ -147,7 +147,7 @@ namespace HaloFrame
         {
             if (IsActive)
             {
-                UIView.gameObject.SetActiveEx(visible);
+                UIView.gameObject.SetActiveScale(visible);
             }
         }
     }
