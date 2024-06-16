@@ -57,6 +57,11 @@ namespace HaloFrame
             }
             else
             {
+                if (UILayer.GetTop() == this)
+                {
+                    return; // 已经在最上层，不需要再打开
+                }
+                
                 // 已经加载完成
                 if (isFirst == false && IsOpen && Order > 0)
                 {
@@ -66,7 +71,7 @@ namespace HaloFrame
             }
         }
 
-        public void Load(object data = null, Action action = null)
+        private void Load(object data = null, Action action = null)
         {
             IsLoading = true;
 
@@ -118,7 +123,7 @@ namespace HaloFrame
         }
 
         /// <summary>
-        /// 用来记录当前界面上还有多少个全屏界面
+        /// 用来记录当前界面上还有多少个全屏界面(外部通过此方法，通过计数计算是否要显示)
         /// </summary>
         /// <param name="v"></param>
         public void AddTopViewNum(int num)
@@ -132,6 +137,7 @@ namespace HaloFrame
         {
             UILayer.CloseUI(this);
             AddTopViewNum(-100000);
+            SetVisible(false);
             UIView.OnPause();
             UIView.OnClose();
             action?.Invoke();
@@ -141,7 +147,7 @@ namespace HaloFrame
         {
             if (IsActive)
             {
-                UIView.gameObject.SetActive(visible);
+                UIView.gameObject.SetActiveEx(visible);
             }
         }
     }

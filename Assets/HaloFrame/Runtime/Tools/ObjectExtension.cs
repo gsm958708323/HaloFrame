@@ -38,10 +38,16 @@ namespace HaloFrame
 
         public static void SetParentEx(this Transform transform, Transform parent)
         {
-            transform.SetParent(parent);
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-            transform.localScale = Vector3.one;
+            transform.SetParent(parent, false);
+            // transform.localPosition = Vector3.zero;
+            // transform.localRotation = Quaternion.identity;
+            // transform.localScale = Vector3.one;
+        }
+
+        public static void SetActiveEx(this GameObject gameObject, bool active)
+        {
+            if (gameObject.activeSelf != active)
+                gameObject.SetActive(active);
         }
 
         public static void SetLayerRecursively(this GameObject gameObject, int layer)

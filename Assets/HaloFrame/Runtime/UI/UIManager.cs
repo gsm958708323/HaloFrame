@@ -12,8 +12,8 @@ namespace HaloFrame
         private Dictionary<UILayerType, UILayer> layerDict;
         private HashSet<UIViewType> openSet;
         private Camera worldCamera, uiCamera;
-        public int width = 1080;
-        public int height = 1920;
+        public int width = 1920;
+        public int height = 1080;
 
         public override void Init()
         {

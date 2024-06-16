@@ -40,16 +40,16 @@ namespace HaloFrame
         private void InitUI()
         {
             redImg = transform.Find("Red").GetComponent<Image>();
-            redImg.gameObject.SetActive(false);
+            redImg.gameObject.SetActiveEx(false);
             numTxt = transform.Find("Num").GetComponent<Text>();
-            numTxt.gameObject.SetActive(RedType == RedType.Num);
+            numTxt.gameObject.SetActiveEx(RedType == RedType.Num);
         }
 
         private void OnRedCallback(int value)
         {
             numTxt.text = value.ToString();
-            redImg.gameObject.SetActive(value > 0);
-            numTxt.gameObject.SetActive(value > 0 && RedType == RedType.Num);
+            redImg.gameObject.SetActiveEx(value > 0);
+            numTxt.gameObject.SetActiveEx(value > 0 && RedType == RedType.Num);
         }
     }
 }

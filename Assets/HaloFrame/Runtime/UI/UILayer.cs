@@ -39,6 +39,12 @@ namespace HaloFrame
             return layer;
         }
 
+        public UIViewCtrl GetTop()
+        {
+            viewStack.TryPeek(out UIViewCtrl topCtrl);
+            return topCtrl;
+        }
+
         internal void OpenUI(UIViewCtrl curCtrl)
         {
             if (curCtrl.Order == 0)

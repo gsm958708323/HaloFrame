@@ -41,6 +41,7 @@ namespace HaloFrame
 
         public virtual void OnOpen(object data)
         {
+            Debugger.Log($"OnOpen {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
         }
 
         /// <summary>
@@ -48,6 +49,8 @@ namespace HaloFrame
         /// </summary>
         public virtual void OnResume()
         {
+            Debugger.Log($"OnResume {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
+
         }
 
         /// <summary>
@@ -56,10 +59,14 @@ namespace HaloFrame
         /// </summary>
         public virtual void OnPause()
         {
+            Debugger.Log($"OnPause {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
+
         }
 
         public virtual void OnClose()
         {
+            Debugger.Log($"OnClose {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
+
         }
     }
 }
