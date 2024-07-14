@@ -9,6 +9,10 @@ namespace HaloFrame
     public class UIManager : IManager
     {
         private Dictionary<UIViewType, UIViewCtrl> ctrlDict;
+        /// <summary>
+        /// 存储UI界面对应的类
+        /// </summary>
+        private Dictionary<UIViewType, Type> uiDict;
         private Dictionary<UILayerType, UILayer> layerDict;
         private HashSet<UIViewType> openSet;
         private Camera worldCamera, uiCamera;
@@ -20,6 +24,7 @@ namespace HaloFrame
             base.Init();
             ctrlDict = new();
             layerDict = new();
+            uiDict = new();
             openSet = new();
 
             InitUI();
@@ -55,44 +60,56 @@ namespace HaloFrame
                 layerDict.Add(layer, uILayer);
             }
 
+            // 根据脚本名称找到对应界面类
             Assembly assembly = Assembly.GetExecutingAssembly();
-            // 初始化界面配置 todo 优化反射？在编辑器上生成
-            var configList = UIConfigSO.Get();
-            foreach (var item in configList)
+            var configDict = UIConfigSO.Get();
+            foreach (var item in configDict)
             {
-                if (ctrlDict.ContainsKey(item.ViewType))
+                if (!layerDict.ContainsKey(item.Value.LayerType))
                 {
-                    Debugger.LogError($"界面类型重复 {item.ViewType}", LogDomain.UI);
-                    continue;
-                }
-                if (!layerDict.ContainsKey(item.LayerType))
-                {
-                    Debugger.LogError($"界面层级不存在 {item.LayerType}", LogDomain.UI);
+                    Debugger.LogError($"界面层级不存在 {item.Value.LayerType}", LogDomain.UI);
                     continue;
                 }
 
-                Type type = assembly.GetType(item.ViewType.ToString());
+                Type type = assembly.GetType(item.Key.ToString());
                 if (type == null)
                 {
-                    Debugger.LogError($"界面对象不存在 {item.ViewType}", LogDomain.UI);
+                    Debugger.LogError($"界面对象不存在 {item.Key}", LogDomain.UI);
                     continue;
                 }
-                // todo 只有UIView能够复用，但是有内存泄漏的风险，考虑去掉？
-                UIViewCtrl viewCtrl = UIViewCtrl.Get(item, UIView.Get(type), layerDict[item.LayerType]);
-                ctrlDict.Add(item.ViewType, viewCtrl);
+                uiDict.Add(item.Key, type); // 打开时才做实例化操作
             }
         }
 
         public void Open(UIViewType type, object data = null, Action action = null)
         {
-            if (!ctrlDict.ContainsKey(type))
+            if (ctrlDict.ContainsKey(type))
+            {
+                ctrlDict[type].Open(data, action);
+                return; // 已经存在直接打开
+            }
+
+            var configDict = UIConfigSO.Get();
+            if (!configDict.TryGetValue(type, out var config))
             {
                 Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
                 return;
             }
+            if (!uiDict.TryGetValue(type, out var uiView))
+            {
+                Debugger.LogError($"界面对象不存在 {type}", LogDomain.UI);
+                return;
+            }
+            if (!layerDict.TryGetValue(config.LayerType, out var layer))
+            {
+                Debugger.LogError($"界面层级不存在 {config.LayerType}", LogDomain.UI);
+                return;
+            }
 
-            openSet.Add(type);
-            ctrlDict[type].Open(data, action);
+            UIView view = Activator.CreateInstance(uiView) as UIView;
+            var ctrl = new UIViewCtrl(config, view, layer);
+            ctrlDict.Add(type, ctrl);
+            ctrl.Open(data, action);
         }
 
         public void Close(UIViewType type, Action action = null)
@@ -103,7 +120,6 @@ namespace HaloFrame
                 return;
             }
 
-            openSet.Remove(type);
             ctrlDict[type].Close(action);
         }
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace HaloFrame
 {
-    public class UIViewCtrl : IReference
+    public class UIViewCtrl
     {
         public UIConfig UIConfig;
         public UIView UIView;
@@ -13,6 +13,7 @@ namespace HaloFrame
         private int topViewNum;
         public int Order;
         public bool IsLoading, IsOpen, IsPause;
+        public UIState UIState = UIState.None;
 
         // 当前界面是否激活（预制体加载完毕）
         public bool IsActive
@@ -20,15 +21,11 @@ namespace HaloFrame
             get { return UIView != null && UIView.gameObject != null; }
         }
 
-        public UIViewCtrl() { }
-
-        internal static UIViewCtrl Get(UIConfig item, UIView uIView, UILayer uILayer)
+        public UIViewCtrl(UIConfig config, UIView view, UILayer layer)
         {
-            var ctrl = ReferencePool.Get<UIViewCtrl>();
-            ctrl.UIConfig = item;
-            ctrl.UIView = uIView;
-            ctrl.UILayer = uILayer;
-            return ctrl;
+            UIConfig = config;
+            UIView = view;
+            UILayer = layer;
         }
 
         public void Clear()

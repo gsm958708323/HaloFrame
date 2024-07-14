@@ -25,4 +25,19 @@ namespace HaloFrame
         public const int UI = 5;
         public const int UIRenderToTarget = 6;
     }
+
+    /// <summary>
+    /// UI状态
+    /// </summary>
+    public enum UIState
+    {
+        None,
+        Loading,
+        Awake,
+        Start,
+        Enable,
+        Disable,
+        Destroy,
+        Release,
+    }
 }

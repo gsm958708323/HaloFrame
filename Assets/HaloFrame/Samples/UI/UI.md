@@ -29,3 +29,9 @@
 ## UI生命周期
 
 OnInit - OnOpen - OnResume - OnPause - OnClose
+
+## 界面1 - 界面2 - 界面1 支持界面按顺序返回
+
+## UI动画管理
+
+## 如果stack中存在界面1，并且现在是隐藏状态，界面生命周期调用是否正常？

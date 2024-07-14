@@ -5,18 +5,12 @@ using UnityEngine;
 
 namespace HaloFrame
 {
-    public class UIView : IReference
+    public class UIView
     {
         public GameObject gameObject;
         public Transform transform;
         public RectTransform rectTransform;
         UIViewCtrl uiViewCtrl;
-
-        public static UIView Get(Type type)
-        {
-            var ui = ReferencePool.Get(type);
-            return ui as UIView;
-        }
 
         public void Clear()
         {
