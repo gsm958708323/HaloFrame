@@ -5,136 +5,119 @@ using UnityEngine;
 
 namespace HaloFrame
 {
-    public class UILayer : IReference
+    public class UILayer
     {
+        private CustomStack<UIView> uiStack;
         private UILayerType layerType;
-        public Canvas Canvas;
-        private int maxOrder; // 当前层级的最大order值
-        private HashSet<int> orderSet; // 当前已分配的order值
-        public Stack<UIViewCtrl> viewStack;
-        private List<UIViewCtrl> tempList;
+        private Canvas canvas;
 
-        public UILayer()
+        public UILayer(UILayerType layerType, Canvas canvas)
         {
-            orderSet = new();
-            viewStack = new();
-            tempList = new();
+            this.layerType = layerType;
+            this.canvas = canvas;
+            uiStack = new CustomStack<UIView>();
         }
 
-        public void Clear()
+        internal void Open(UIViewType type, Action action, object[] args)
         {
-            layerType = 0;
-            Canvas = null;
-            orderSet.Clear();
-            viewStack.Clear();
-            tempList.Clear();
-        }
-
-        public static UILayer Get(UILayerType layerType, Canvas canvas)
-        {
-            var layer = ReferencePool.Get<UILayer>();
-            layer.layerType = layerType;
-            layer.Canvas = canvas;
-            return layer;
-        }
-
-        public UIViewCtrl GetTop()
-        {
-            viewStack.TryPeek(out UIViewCtrl topCtrl);
-            return topCtrl;
-        }
-
-        internal void OpenUI(UIViewCtrl curCtrl)
-        {
-            if (curCtrl.Order == 0)
+            UIView view = GameManager.UIManager.CreateUI(type);
+            if (view == null)
             {
-                curCtrl.Order = PopOrder(curCtrl);
+                Debugger.LogError($"创建UI对象失败 {type}", LogDomain.UI);
+                return;
             }
 
-            foreach (var ctrl in viewStack)
-            {
-                // 筛选出order值小于当前界面的，设置为暂停状态 
-                if (ctrl != curCtrl && ctrl.Order < curCtrl.Order && ctrl.IsActive)
-                {
-                    if (!ctrl.IsPause)
-                    {
-                        // 这里不会触发界面的显示隐藏
-                        ctrl.IsPause = true;
-                        ctrl.UIView.OnPause();
-                    }
+            OpenAsync(view, action, args);
+        }
 
-                    if (!curCtrl.UIConfig.IsWindow)
+        private async void OpenAsync(UIView view, Action action, object[] args)
+        {
+            await GameManager.UIManager.LoadUIAsync(view);
+            // 新界面如果是弹窗则不做处理
+            // 如果是全屏界面，则要关闭上一个界面
+            if (uiStack.Count != 0)
+            {
+                var uiList = uiStack.GetList();
+                for (int i = uiList.Count - 1; i >= 0; i--)
+                {
+                    var preView = uiList[i];
+                    if (preView != null && preView.UIState == UIState.Enable)
                     {
-                        // 这里才会触发界面的显示隐藏
-                        ctrl.AddTopViewNum(1);
+                        await preView.DisableAsync();
                     }
                 }
             }
+
+            uiStack.Push(view);
+            int order = (uiStack.Count - 1) * UIDefine.ORDER_VIEW_ADD;
+            view.SetOrder(order);
+
+            await view.StartAsync(args);
+            action?.Invoke();
         }
 
-        internal void CloseUI(UIViewCtrl curCtrl)
+        public void Pop(Action action = null)
         {
-            int order = curCtrl.Order;
-            PushOrder(curCtrl); // 归还不再使用的order
-            curCtrl.Order = 0;
+            PopAsync(action);
+        }
 
-            if (viewStack.Count > 0)
+        private async void PopAsync(Action action)
+        {
+            // 当前栈顶界面退出
+            if (uiStack.Count != 0)
             {
-                var topView = viewStack.Peek();
-                if (topView.IsPause)
-                {
-                    topView.IsPause = false;
-                    topView.UIView.OnResume();
-                }
+                UIView topView = uiStack.Peek();
+                await topView.DestroyAsync();
+                uiStack.Pop();
+                topView.Destroy();
+                GameManager.UIManager.ReleaseUI(topView);
+            }
 
-                if (!curCtrl.UIConfig.IsWindow)
+            // 前一个界面显示
+            if (uiStack.Count != 0)
+            {
+                var preView = uiStack.Peek();
+                if (preView != null && preView.UIState == UIState.Disable)
                 {
-                    foreach (var ctrl in viewStack)
+                    if (preView.UIConfig.IsPopup)
                     {
-                        if (ctrl != curCtrl && ctrl.Order < order && ctrl.IsOpen)
+                        var uiList = uiStack.GetList();
+
+                        // 前一个界面为弹窗，则要找到一个全屏界面，并将中间的所有弹窗都显出来
+                        var list = new List<UIView>(); // todo 池
+                        for (int i = uiList.Count - 1; i >= 0; i--)
                         {
-                            ctrl.AddTopViewNum(-1);
+                            var view = uiList[i];
+                            if (view == null)
+                                break;
+
+                            list.Add(view);
+                            if (!view.UIConfig.IsPopup)
+                            {
+                                break;
+                            }
+                        }
+
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            var ui = list[i];
+                            await ui.EnableAsync();
                         }
                     }
+                    else
+                    {
+                        // 前一个界面为全屏界面，直接显示
+                        await preView.EnableAsync();
+                    }
                 }
             }
+
+            action?.Invoke();
         }
 
-        private void PushOrder(UIViewCtrl curCtrl)
+        internal void Remove(UIViewType type)
         {
-            int order = curCtrl.Order;
-            if (!orderSet.Contains(order))
-                return;
-
-            orderSet.Remove(order);
-
-            tempList.Clear();
-            // 栈无法直接从中间移除，操作当前界面到栈顶中间的所有界面 todo 把栈改成list？
-            while (viewStack.Count > 0)
-            {
-                var ctrl = viewStack.Pop();
-                if (ctrl != curCtrl)
-                {
-                    tempList.Add(ctrl);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            for (int i = tempList.Count - 1; i >= 0; i--)
-            {
-                viewStack.Push(tempList[i]);
-            }
-        }
-
-        internal int PopOrder(UIViewCtrl curCtrl)
-        {
-            maxOrder += 10; // 每个界面给10个层级
-            orderSet.Add(maxOrder);
-            viewStack.Push(curCtrl);
-            return maxOrder;
+            throw new NotImplementedException();
         }
     }
 }

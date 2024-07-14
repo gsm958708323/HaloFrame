@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum UIViewType
 {
+    None,
     UITestFullView1,
     UITestFullView2,
     UITestTipsView1,

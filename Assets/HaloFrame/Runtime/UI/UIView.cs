@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HaloFrame
@@ -10,57 +11,46 @@ namespace HaloFrame
         public GameObject gameObject;
         public Transform transform;
         public RectTransform rectTransform;
-        UIViewCtrl uiViewCtrl;
+        public UIConfig UIConfig;
+
+        public UIState UIState { get; internal set; }
 
         public void Clear()
         {
             gameObject = null;
             transform = null;
             rectTransform = null;
-            uiViewCtrl = null;
+            UIConfig = null;
         }
 
-        public void CloseSelf()
+        internal void Destroy()
         {
-            GameManager.UIManager.Close(uiViewCtrl.UIConfig.ViewType);
+            throw new NotImplementedException();
         }
 
-        public virtual void OnInit(GameObject go, UIViewCtrl ctrl)
+        internal async Task DestroyAsync()
         {
-            uiViewCtrl = ctrl;
-            gameObject = go;
-            transform = go.transform;
-            rectTransform = go.GetComponent<RectTransform>();
+            throw new NotImplementedException();
         }
 
-        public virtual void OnOpen(object data)
+        internal async Task DisableAsync()
         {
-            Debugger.Log($"OnOpen {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// 界面被恢复时调用
-        /// </summary>
-        public virtual void OnResume()
+        internal async Task EnableAsync()
         {
-            Debugger.Log($"OnResume {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
-
+            throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// 界面被覆盖时调用，被非全屏和全屏界面覆盖时都会调用。
-        /// 暂停和恢复不影响其是否被显示隐藏，只要不是最上层UI都应该标记暂停状态
-        /// </summary>
-        public virtual void OnPause()
+        internal void SetOrder(int order)
         {
-            Debugger.Log($"OnPause {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
-
+            throw new NotImplementedException();
         }
 
-        public virtual void OnClose()
+        internal async Task StartAsync(object[] args)
         {
-            Debugger.Log($"OnClose {uiViewCtrl.UIConfig.ViewType}", LogDomain.UI);
-
+            throw new NotImplementedException();
         }
     }
 }

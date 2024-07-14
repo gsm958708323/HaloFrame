@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HaloFrame
 {
     public class UIManager : IManager
     {
-        private Dictionary<UIViewType, UIViewCtrl> ctrlDict;
         /// <summary>
         /// 存储UI界面对应的类
         /// </summary>
@@ -22,7 +22,6 @@ namespace HaloFrame
         public override void Init()
         {
             base.Init();
-            ctrlDict = new();
             layerDict = new();
             uiDict = new();
             openSet = new();
@@ -55,8 +54,8 @@ namespace HaloFrame
             foreach (UILayerType layer in layers)
             {
                 bool is3d = layer == UILayerType.SceneLayer;
-                Canvas canvas = UIExtension.CreateLayerCanvas(layer, is3d, root.transform, is3d ? worldCamera : uiCamera, width, height);
-                var uILayer = UILayer.Get(layer, canvas);
+                Canvas canvas = UIExtension.CreateLayerCanvas(layer, is3d, root.transform, is3d ? worldCamera : uiCamera, UIDefine.WIDTH, UIDefine.HEIGHT);
+                var uILayer = new UILayer(layer, canvas);
                 layerDict.Add(layer, uILayer);
             }
 
@@ -81,14 +80,8 @@ namespace HaloFrame
             }
         }
 
-        public void Open(UIViewType type, object data = null, Action action = null)
+        public void Open(UIViewType type, Action action = null, params object[] args)
         {
-            if (ctrlDict.ContainsKey(type))
-            {
-                ctrlDict[type].Open(data, action);
-                return; // 已经存在直接打开
-            }
-
             var configDict = UIConfigSO.Get();
             if (!configDict.TryGetValue(type, out var config))
             {
@@ -106,21 +99,46 @@ namespace HaloFrame
                 return;
             }
 
-            UIView view = Activator.CreateInstance(uiView) as UIView;
-            var ctrl = new UIViewCtrl(config, view, layer);
-            ctrlDict.Add(type, ctrl);
-            ctrl.Open(data, action);
+            layer.Open(type, action, args);
         }
 
-        public void Close(UIViewType type, Action action = null)
+        public void Close(UIViewType type = UIViewType.None)
         {
-            if (!ctrlDict.ContainsKey(type))
+            var configDict = UIConfigSO.Get();
+            if (!configDict.TryGetValue(type, out var config))
             {
                 Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
                 return;
             }
+            if (!layerDict.TryGetValue(config.LayerType, out var layer))
+            {
+                Debugger.LogError($"界面层级不存在 {config.LayerType}", LogDomain.UI);
+                return;
+            }
 
-            ctrlDict[type].Close(action);
+            if (type == UIViewType.None)
+            {
+                layer.Pop();
+            }
+            else
+            {
+                layer.Remove(type);
+            }
+        }
+
+        internal UIView CreateUI(UIViewType type)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal async Task LoadUIAsync(UIView view)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void ReleaseUI(UIView topView)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -11,6 +11,6 @@ namespace HaloFrame
         public UIViewType ViewType;
         public string Prefab;
         public UILayerType LayerType;
-        public bool IsWindow; // 是否为弹窗
+        public bool IsPopup; // 是否为弹窗
     }
 }
