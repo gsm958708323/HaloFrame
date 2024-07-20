@@ -10,24 +10,25 @@ namespace HaloFrame
         private CustomStack<UIView> uiStack;
         private UILayerType layerType;
         public Canvas Canvas;
+        private int baseOrde;
 
         public UILayer(UILayerType layerType, Canvas canvas)
         {
             this.layerType = layerType;
             this.Canvas = canvas;
             uiStack = new CustomStack<UIView>();
+            baseOrde = canvas.sortingOrder;
         }
 
         internal void Open(UIViewType type, Action action, object[] args)
         {
-            UIView view = GameManager.UI.CreateUI(type);
+            UIView view = GameManager.UI.CreateUI(type, this);
             if (view == null)
             {
                 Debugger.LogError($"创建UI对象失败 {type}", LogDomain.UI);
                 return;
             }
 
-            view.BindLayer(this);
             OpenAsync(view, action, args);
         }
 
@@ -51,7 +52,7 @@ namespace HaloFrame
             }
 
             uiStack.Push(view);
-            int order = (uiStack.Count - 1) * UIDefine.ORDER_VIEW_ADD;
+            int order = (uiStack.Count - 1) * UIDefine.ORDER_VIEW_ADD + baseOrde;
             view.SetOrder(order);
 
             await view.StartAsync(args);

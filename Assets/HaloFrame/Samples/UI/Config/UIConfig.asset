@@ -13,19 +13,19 @@ MonoBehaviour:
   m_Name: UIConfig
   m_EditorClassIdentifier: 
   uiConfigs:
-  - ViewType: 0
+  - ViewType: 1
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestFullView1.prefab
     LayerType: 3000
-    IsWindow: 0
-  - ViewType: 1
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestFullView2.prefab
-    LayerType: 3000
-    IsWindow: 0
+    IsPopup: 0
   - ViewType: 2
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestFullView2.prefab
+    LayerType: 5000
+    IsPopup: 0
+  - ViewType: 3
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestTipsView1.prefab
     LayerType: 3000
-    IsWindow: 1
-  - ViewType: 3
+    IsPopup: 1
+  - ViewType: 4
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestTipsView2.prefab
-    LayerType: 3000
-    IsWindow: 1
+    LayerType: 5000
+    IsPopup: 1

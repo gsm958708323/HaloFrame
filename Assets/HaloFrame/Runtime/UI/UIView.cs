@@ -13,9 +13,9 @@ namespace HaloFrame
     /// </summary>
     public class UIView
     {
-        public GameObject GameObject;
-        public Transform Transform;
-        public RectTransform RectTransform;
+        public GameObject gameObject;
+        public Transform transform;
+        public RectTransform rectTransform;
         public UIConfig UIConfig;
         public UILayer UILayer;
 
@@ -32,29 +32,36 @@ namespace HaloFrame
         {
             UIState = UIState.None;
             canvasDict = new Dictionary<Canvas, int>();
+            TaskResult = new TaskCompletionSource<bool>();
+        }
+
+        public void Bind(UIConfig config, UILayer layer)
+        {
+            UIConfig = config;
+            UILayer = layer;
         }
 
         public void Clear()
         {
-            GameObject = null;
-            Transform = null;
-            RectTransform = null;
+            gameObject = null;
+            transform = null;
+            rectTransform = null;
             UIConfig = null;
             UILayer = null;
             TaskResult = null;
             canvasDict = null;
         }
 
-        internal void BindLayer(UILayer uILayer)
-        {
-            UILayer = uILayer;
-        }
         private void ActiveGameObject(bool active)
         {
-            if (GameObject != null)
+            if (gameObject != null)
             {
-                GameObject.SetActiveEx(active);
+                gameObject.SetActiveEx(active);
             }
+        }
+        protected void CloseSelf()
+        {
+            GameManager.UI.Close(UIConfig.ViewType);
         }
 
         /// <summary>
@@ -63,9 +70,9 @@ namespace HaloFrame
         /// <param name="go"></param>
         internal void LoadAsset(GameObject go)
         {
-            GameObject = go;
-            Transform = go.transform;
-            RectTransform = go.GetComponent<RectTransform>();
+            gameObject = go;
+            transform = go.transform;
+            rectTransform = go.GetComponent<RectTransform>();
             ActiveGameObject(false);
 
             // 设置父节点
@@ -73,7 +80,7 @@ namespace HaloFrame
             go.transform.SetAsLastSibling();
 
             // 子节点canvas信息初始化
-            var canvases = GameObject.GetComponentsInChildren<Canvas>(true);
+            var canvases = gameObject.GetComponentsInChildren<Canvas>(true);
             for (int i = 0; i < canvases.Length; i++)
             {
                 var childCanvas = canvases[i];
@@ -206,9 +213,9 @@ namespace HaloFrame
             {
                 UIState = UIState.Destroy;
                 OnDestroy();
-                if (GameObject != null)
+                if (gameObject != null)
                 {
-                    GameObject.Destroy(this.GameObject);
+                    GameObject.Destroy(this.gameObject);
                 }
 
                 Clear();

@@ -18,6 +18,7 @@ public class UIConfigSO : ScriptableObject
             if (so == null)
                 return null;
 
+            configDict = new Dictionary<UIViewType, UIConfig>();
             foreach (var item in so.uiConfigs)
             {
                 if (configDict.ContainsKey(item.ViewType))

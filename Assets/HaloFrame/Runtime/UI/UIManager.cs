@@ -102,7 +102,7 @@ namespace HaloFrame
             layer.Open(type, action, args);
         }
 
-        public void Close(UIViewType type = UIViewType.None)
+        public void Close(UIViewType type)
         {
             var configDict = UIConfigSO.Get();
             if (!configDict.TryGetValue(type, out var config))
@@ -116,25 +116,28 @@ namespace HaloFrame
                 return;
             }
 
-            if (type == UIViewType.None)
-            {
-                layer.Pop();
-            }
-            else
-            {
-                layer.Remove(type);
-            }
+            layer.Pop();
         }
 
-        internal UIView CreateUI(UIViewType type)
+        internal UIView CreateUI(UIViewType type, UILayer layer)
         {
-            if (!uiDict.TryGetValue(type, out var view))
+            if (!uiDict.TryGetValue(type, out var viewType))
             {
                 Debugger.LogError($"界面对象不存在 {type}", LogDomain.UI);
                 return null;
+
             }
+            var configDict = UIConfigSO.Get();
+            if (!configDict.TryGetValue(type, out var config))
+            {
+                Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
+                return null;
+            }
+
+            var view = (UIView)Activator.CreateInstance(viewType);
+            view.Bind(config, layer);
             // todo 子界面
-            return (UIView)Activator.CreateInstance(view);
+            return view;
         }
 
         internal async Task LoadUIAsync(UIView view)
@@ -184,9 +187,9 @@ namespace HaloFrame
             view.UIState = UIState.Release;
 
             // todo 子界面不销毁
-            if (view.GameObject != null)
+            if (view.gameObject != null)
             {
-                GameManager.Resource.UnloadAsset(view.GameObject);
+                GameManager.Resource.UnloadAsset(view.gameObject);
             }
         }
     }
