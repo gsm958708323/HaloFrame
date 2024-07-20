@@ -16,11 +16,11 @@ public class RedDotClick : MonoBehaviour, IPointerClickHandler
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            GameManager.RedDotManager.AddValue(redDotItem.Key, 1);
+            GameManager.RedDot.AddValue(redDotItem.Key, 1);
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
-            GameManager.RedDotManager.AddValue(redDotItem.Key, -1);
+            GameManager.RedDot.AddValue(redDotItem.Key, -1);
         }
     }
 }

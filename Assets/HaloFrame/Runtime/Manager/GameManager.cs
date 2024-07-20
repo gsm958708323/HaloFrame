@@ -5,21 +5,21 @@ using HaloFrame;
 
 public class GameManager : GameManagerBase
 {
-    public static DriverManager DriverManager;
-    public static RedDotManager RedDotManager;
+    public static DriverManager Driver;
+    public static RedDotManager RedDot;
     public static Dispatcher Dispatcher;
-    public static UIManager UIManager;
-    public static ResourceManager ResourceManager;
+    public static UIManager UI;
+    public static ResourceManager Resource;
 
     protected override void InitManager()
     {
         base.InitManager();
 
         Dispatcher = GetManager<Dispatcher>();
-        ResourceManager = GetManager<ResourceManager>();
-        DriverManager = GetManager<DriverManager>();
-        RedDotManager = GetManager<RedDotManager>();
-        UIManager = GetManager<UIManager>();
+        Resource = GetManager<ResourceManager>();
+        Driver = GetManager<DriverManager>();
+        RedDot = GetManager<RedDotManager>();
+        UI = GetManager<UIManager>();
     }
 
     /*

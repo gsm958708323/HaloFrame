@@ -9,33 +9,35 @@ namespace HaloFrame
     {
         private CustomStack<UIView> uiStack;
         private UILayerType layerType;
-        private Canvas canvas;
+        public Canvas Canvas;
 
         public UILayer(UILayerType layerType, Canvas canvas)
         {
             this.layerType = layerType;
-            this.canvas = canvas;
+            this.Canvas = canvas;
             uiStack = new CustomStack<UIView>();
         }
 
         internal void Open(UIViewType type, Action action, object[] args)
         {
-            UIView view = GameManager.UIManager.CreateUI(type);
+            UIView view = GameManager.UI.CreateUI(type);
             if (view == null)
             {
                 Debugger.LogError($"创建UI对象失败 {type}", LogDomain.UI);
                 return;
             }
 
+            view.BindLayer(this);
             OpenAsync(view, action, args);
         }
 
         private async void OpenAsync(UIView view, Action action, object[] args)
         {
-            await GameManager.UIManager.LoadUIAsync(view);
+            await GameManager.UI.LoadUIAsync(view);
+
             // 新界面如果是弹窗则不做处理
             // 如果是全屏界面，则要关闭上一个界面
-            if (uiStack.Count != 0)
+            if (!view.UIConfig.IsPopup && uiStack.Count != 0)
             {
                 var uiList = uiStack.GetList();
                 for (int i = uiList.Count - 1; i >= 0; i--)
@@ -70,7 +72,7 @@ namespace HaloFrame
                 await topView.DestroyAsync();
                 uiStack.Pop();
                 topView.Destroy();
-                GameManager.UIManager.ReleaseUI(topView);
+                GameManager.UI.ReleaseUI(topView);
             }
 
             // 前一个界面显示

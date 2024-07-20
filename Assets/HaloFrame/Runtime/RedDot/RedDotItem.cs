@@ -28,7 +28,7 @@ namespace HaloFrame
             Key = key;
             RedType = redType;
             InitUI();
-            var node = GameManager.RedDotManager.AddListener(Key, OnRedCallback);
+            var node = GameManager.RedDot.AddListener(Key, OnRedCallback);
             return node;
         }
 

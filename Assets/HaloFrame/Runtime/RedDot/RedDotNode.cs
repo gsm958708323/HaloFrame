@@ -21,13 +21,13 @@ namespace HaloFrame
                 // test
                 if (string.IsNullOrEmpty(fullPath))
                 {
-                    if (Parent == null || Parent == GameManager.RedDotManager.Root)
+                    if (Parent == null || Parent == GameManager.RedDot.Root)
                     {
                         fullPath = Name;
                     }
                     else
                     {
-                        fullPath = Parent.FullPath + GameManager.RedDotManager.SplitChar + Name;
+                        fullPath = Parent.FullPath + GameManager.RedDot.SplitChar + Name;
                     }
                 }
                 return fullPath;
@@ -146,9 +146,9 @@ namespace HaloFrame
 
             Value = value;
             changeCB?.Invoke(value);
-            GameManager.RedDotManager.NodeValueChangeCallback?.Invoke(this, Value);
+            GameManager.RedDot.NodeValueChangeCallback?.Invoke(this, Value);
             //标记父节点为脏节点
-            GameManager.RedDotManager.MarkDirtyNode(Parent);
+            GameManager.RedDot.MarkDirtyNode(Parent);
         }
 
         public RedDotNode AddChild(RangeString key)
@@ -164,7 +164,7 @@ namespace HaloFrame
 
             RedDotNode child = new RedDotNode(key.ToString(), this);
             Childrens.Add(key, child);
-            GameManager.RedDotManager.NodeNumChangeCallback?.Invoke();
+            GameManager.RedDot.NodeNumChangeCallback?.Invoke();
             return child;
         }
 
@@ -179,10 +179,10 @@ namespace HaloFrame
             if (child != null)
             {
                 // todo 先移除再刷新？
-                GameManager.RedDotManager.MarkDirtyNode(this);
+                GameManager.RedDot.MarkDirtyNode(this);
                 Childrens.Remove(key);
 
-                GameManager.RedDotManager.NodeNumChangeCallback?.Invoke();
+                GameManager.RedDot.NodeNumChangeCallback?.Invoke();
                 return true;
 
             }
@@ -198,8 +198,8 @@ namespace HaloFrame
 
             Childrens.Clear();
 
-            GameManager.RedDotManager.MarkDirtyNode(this);
-            GameManager.RedDotManager.NodeNumChangeCallback?.Invoke();
+            GameManager.RedDot.MarkDirtyNode(this);
+            GameManager.RedDot.NodeNumChangeCallback?.Invoke();
         }
 
         private RedDotNode GetChild(RangeString key)

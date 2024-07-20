@@ -128,17 +128,66 @@ namespace HaloFrame
 
         internal UIView CreateUI(UIViewType type)
         {
-            throw new NotImplementedException();
+            if (!uiDict.TryGetValue(type, out var view))
+            {
+                Debugger.LogError($"界面对象不存在 {type}", LogDomain.UI);
+                return null;
+            }
+            // todo 子界面
+            return (UIView)Activator.CreateInstance(view);
         }
 
         internal async Task LoadUIAsync(UIView view)
         {
-            throw new NotImplementedException();
+            await LoadUITask(view);
+            await LoadChildIUI(view);
+            if (view.UIState == UIState.Loading)
+            {
+                view.Awake();
+            }
         }
 
-        internal void ReleaseUI(UIView topView)
+        private async Task LoadChildIUI(UIView view)
         {
-            throw new NotImplementedException();
+
+        }
+
+        private Task LoadUITask(UIView view)
+        {
+            if (view.UIState == UIState.None)
+            {
+                LoadAsset(view);
+            }
+            return view.TaskResult.Task;
+        }
+
+        private void LoadAsset(UIView view)
+        {
+            // todo 支持两种加载方式：动态加载，代码指定Gameobject
+            view.UIState = UIState.Loading;
+            GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.Prefab);
+            var go = GameObject.Instantiate(prefab);
+            view.LoadAsset(go);
+
+            if (view.TaskResult != null)
+            {
+                view.TaskResult.SetResult(true);
+            }
+        }
+
+        internal void ReleaseUI(UIView view)
+        {
+            if (view.UIState == UIState.None || view.UIState == UIState.Release)
+            {
+                return;
+            }
+            view.UIState = UIState.Release;
+
+            // todo 子界面不销毁
+            if (view.GameObject != null)
+            {
+                GameManager.Resource.UnloadAsset(view.GameObject);
+            }
         }
     }
 }

@@ -95,12 +95,12 @@ namespace HaloFrame
 
         public override string ToString()
         {
-            GameManager.RedDotManager.CacheString.Clear();
+            GameManager.RedDot.CacheString.Clear();
             for (int i = m_StartIndex; i <= m_EndIndex; i++)
             {
-                GameManager.RedDotManager.CacheString.Append(m_Source[i]);
+                GameManager.RedDot.CacheString.Append(m_Source[i]);
             }
-            string str = GameManager.RedDotManager.CacheString.ToString();
+            string str = GameManager.RedDot.CacheString.ToString();
 
             return str;
         }

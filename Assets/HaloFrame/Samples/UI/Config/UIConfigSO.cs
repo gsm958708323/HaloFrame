@@ -14,7 +14,7 @@ public class UIConfigSO : ScriptableObject
         if (configDict == null)
         {
             var path = "Assets/HaloFrame/Samples/UI/Config/UIConfig.asset";
-            var so = GameManager.ResourceManager.LoadAsset<UIConfigSO>(path);
+            var so = GameManager.Resource.LoadAsset<UIConfigSO>(path);
             if (so == null)
                 return null;
 

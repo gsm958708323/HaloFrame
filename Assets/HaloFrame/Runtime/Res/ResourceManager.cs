@@ -12,5 +12,10 @@ namespace HaloFrame
         {
             return AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
+
+        public void UnloadAsset(GameObject asset)
+        {
+            Object.Destroy(asset);
+        }
     }
 }
