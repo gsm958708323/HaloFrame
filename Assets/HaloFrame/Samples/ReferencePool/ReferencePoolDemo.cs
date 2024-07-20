@@ -1,13 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HaloFrame;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 
 public class ReferencePoolDemo : MonoBehaviour
 {
     void Start()
+    {
+        //TestReferencePool();
+
+        TestListPool();
+    }
+
+    void TestReferencePool()
     {
         TestGet();
         TestGetMultiple();
@@ -17,6 +26,37 @@ public class ReferencePoolDemo : MonoBehaviour
         TestRemove();
         TestRemoveAll();
     }
+
+    private void TestListPool()
+    {
+        Profiler.BeginSample("TestListPool");
+        // 1.3kb
+        for (int i = 0; i < 10000; i++)
+        {
+            var list = ListPool<int>.Get();
+            list.Add(1);
+            list.Add(2);
+            ListPool<int>.Release(list);
+
+            var dict = DictionaryPool<int, int>.Get();
+            dict.Add(1, 1);
+            dict.Add(2, 2);
+            DictionaryPool<int, int>.Release(dict);
+        }
+
+        // Pool.Debug();
+        // Pool.DisposeAll();
+        // Pool.Debug();
+
+        // 28.6kb
+        // for (int i = 0; i < 100; i++)
+        // {
+        //     var list = new List<int>() { 1, 2 };
+        //     var dict = new Dictionary<int, int>() { { 1, 1 }, { 2, 2 } };
+        // }
+        Profiler.EndSample();
+    }
+
     // Update is called once per frame
     void Update()
     {
