@@ -4,7 +4,7 @@ using HaloFrame;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UITestTipsView1 : UIGameView
+public class FullView2 : UIGameView
 {
     protected override void OnAwake()
     {

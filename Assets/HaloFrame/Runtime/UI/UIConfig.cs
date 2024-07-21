@@ -37,12 +37,6 @@ namespace HaloFrame
         /// </summary>
         public string Prefab;
         public List<ViewType> ChildList;
-
-        /// <summary>
-        /// 是否为子界面
-        /// </summary>
-        public bool IsChild = false;
-        public ViewType ParentUI;
         public bool LoadWithParent = false;
     }
 }

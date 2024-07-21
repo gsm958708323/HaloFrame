@@ -108,7 +108,7 @@ namespace HaloFrame
             if (!showList.Contains(subView))
                 showList.Add(subView);
 
-            var order = (showList.Count - 1) * UIDefine.ORDER_SUBVIEW_ADD;
+            var order = subView.Parent.SortingOrder + (showList.Count - 1) * UIDefine.ORDER_SUBVIEW_ADD;
             subView.SetCanvasOrder(order);
             if (subView.UIState == UIState.Awake)
             {
@@ -231,7 +231,7 @@ namespace HaloFrame
 
         private async Task WaitChildAnimation()
         {
-            throw new NotImplementedException();
+
         }
     }
 }

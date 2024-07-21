@@ -5,9 +5,11 @@ using UnityEngine;
 public enum ViewType
 {
     None,
-    UITestFullView1,
-    UITestFullView2,
-    UITestTipsView1,
-    UITestTipsView2,
+    FullView1,
+    FullView2,
+    TipsView1,
+    TipsView2,
+    ChildView1,
+    ChildView2,
     Max,
 }

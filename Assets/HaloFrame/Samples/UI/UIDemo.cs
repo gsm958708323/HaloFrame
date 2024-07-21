@@ -14,20 +14,20 @@ public class UIDemo : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            GameManager.UI.Open(ViewType.UITestFullView1);
+            GameManager.UI.Open(ViewType.FullView1);
         }
         if (Input.GetKeyDown(KeyCode.W))
         {
-            GameManager.UI.Open(ViewType.UITestFullView2);
+            GameManager.UI.Open(ViewType.FullView2);
         }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            GameManager.UI.Open(ViewType.UITestTipsView1);
+            GameManager.UI.Open(ViewType.TipsView1);
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            GameManager.UI.Open(ViewType.UITestTipsView2);
+            GameManager.UI.Open(ViewType.TipsView2);
         }
     }
 }

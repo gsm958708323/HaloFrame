@@ -11,7 +11,7 @@ namespace HaloFrame
     public class UIManager : IManager
     {
         /// <summary>
-        /// 存储UI界面对应的类
+        /// 存储UI界面对应的类型
         /// </summary>
         private Dictionary<ViewType, Type> uiDict;
         private Dictionary<LayerType, UILayer> layerDict;
@@ -137,7 +137,11 @@ namespace HaloFrame
                     if (subConfig == null)
                         continue;
 
-                    UISubView subView = (UISubView)Activator.CreateInstance(viewType);
+                    if(!uiDict.TryGetValue(subConfig.ViewType, out var subType))
+                    {
+                        continue;
+                    }
+                    UISubView subView = (UISubView)Activator.CreateInstance(subType);
                     subView.Bind(subConfig, layer);
                     view.AddChild(subConfig.ViewType, subView);
                 }

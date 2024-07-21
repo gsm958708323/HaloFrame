@@ -14,18 +14,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiConfigs:
   - ViewType: 1
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestFullView1.prefab
     LayerType: 3000
+    ResType: 0
     IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab
+    ChildList: 0500000006000000
+    LoadWithParent: 0
   - ViewType: 2
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestFullView2.prefab
     LayerType: 5000
+    ResType: 0
     IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab
+    ChildList: 
+    LoadWithParent: 0
   - ViewType: 3
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestTipsView1.prefab
     LayerType: 3000
+    ResType: 0
     IsPopup: 1
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab
+    ChildList: 
+    LoadWithParent: 0
   - ViewType: 4
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/UITestTipsView2.prefab
     LayerType: 5000
+    ResType: 0
     IsPopup: 1
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab
+    ChildList: 
+    LoadWithParent: 0
+  - ViewType: 5
+    LayerType: 3000
+    ResType: 1
+    IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab
+    ChildList: 
+    LoadWithParent: 0
+  - ViewType: 6
+    LayerType: 3000
+    ResType: 0
+    IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab
+    ChildList: 
+    LoadWithParent: 0
