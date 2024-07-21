@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HaloFrame
 {
-    public enum UILayerType
+    public enum LayerType
     {
         SceneLayer = 1000, // 用于显示3DUI
         BackgroundLayer = 2000, // 用于显示UI背景，如主界面，黑边图
@@ -24,6 +24,11 @@ namespace HaloFrame
         public const int Water = 4;
         public const int UI = 5;
         public const int UIRenderToTarget = 6;
+    }
+
+    public enum ResType {
+        Dynamic, // 动态实例化，默认
+        Static, // 查找节点作为界面资源
     }
 
     /// <summary>

@@ -72,5 +72,40 @@ namespace HaloFrame
             else
                 dict.Add(key, value);
         }
+
+        public static Transform FindEx(this Transform t, string name)
+        {
+            if (t == null)
+                return null;
+            var list = ListPool<Transform>.Get();
+            list.Add(t); // 添加自己
+            int index = 0;
+            // 递归遍历，找到则返回
+            while (list.Count > index)
+            {
+                var transform = list[index];
+                for (int i = 0; i < transform.childCount; i++)
+                {
+                    var child = transform.GetChild(i);
+                    if (child.name == name)
+                    {
+                        ListPool<Transform>.Release(list);
+                        return child;
+                    }
+                    list.Add(child);
+                }
+            }
+            ListPool<Transform>.Release(list);
+            return null;
+        }
+
+        public static GameObject FindEx(this GameObject go, string name)
+        {
+            if (go == null)
+                return null;
+
+            var target = go.transform.FindEx(name);
+            return target == null ? null : target.gameObject;
+        }
     }
 }

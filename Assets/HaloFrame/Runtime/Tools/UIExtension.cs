@@ -232,7 +232,7 @@ namespace HaloFrame
             return canvasGroup;
         }
 
-        public static Canvas CreateLayerCanvas(UILayerType layer, bool is3d, Transform parent, Camera camera, float width, float height)
+        public static Canvas CreateLayerCanvas(LayerType layer, bool is3d, Transform parent, Camera camera, float width, float height)
         {
             GameObject canvasGo = new GameObject(layer.ToString());
             RectTransform rectTransform = canvasGo.AddComponent<RectTransform>();

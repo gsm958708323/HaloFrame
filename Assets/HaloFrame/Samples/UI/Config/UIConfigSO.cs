@@ -8,8 +8,8 @@ public class UIConfigSO : ScriptableObject
 {
     public List<UIConfig> uiConfigs;
 
-    private static Dictionary<UIViewType, UIConfig> configDict;
-    public static Dictionary<UIViewType, UIConfig> Get()
+    private static Dictionary<ViewType, UIConfig> configDict;
+    public static Dictionary<ViewType, UIConfig> GetAll()
     {
         if (configDict == null)
         {
@@ -18,7 +18,7 @@ public class UIConfigSO : ScriptableObject
             if (so == null)
                 return null;
 
-            configDict = new Dictionary<UIViewType, UIConfig>();
+            configDict = new Dictionary<ViewType, UIConfig>();
             foreach (var item in so.uiConfigs)
             {
                 if (configDict.ContainsKey(item.ViewType))
@@ -32,5 +32,17 @@ public class UIConfigSO : ScriptableObject
         }
 
         return configDict;
+    }
+
+    public static UIConfig Get(ViewType viewType)
+    {
+        var all = GetAll();
+        if (all == null)
+        {
+            Debugger.LogError($"界面配置不存在 {viewType}", LogDomain.UI);
+            return null;
+        }
+
+        return all[viewType];
     }
 }

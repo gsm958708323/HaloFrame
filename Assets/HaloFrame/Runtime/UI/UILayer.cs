@@ -8,19 +8,19 @@ namespace HaloFrame
     public class UILayer
     {
         private CustomStack<UIView> uiStack;
-        private UILayerType layerType;
+        private LayerType layerType;
         public Canvas Canvas;
-        private int baseOrde;
+        private int baseOrder;
 
-        public UILayer(UILayerType layerType, Canvas canvas)
+        public UILayer(LayerType layerType, Canvas canvas)
         {
             this.layerType = layerType;
             this.Canvas = canvas;
             uiStack = new CustomStack<UIView>();
-            baseOrde = canvas.sortingOrder;
+            baseOrder = canvas.sortingOrder;
         }
 
-        internal void Open(UIViewType type, Action action, object[] args)
+        internal void Open(ViewType type, Action action, object[] args)
         {
             UIView view = GameManager.UI.CreateUI(type, this);
             if (view == null)
@@ -52,8 +52,8 @@ namespace HaloFrame
             }
 
             uiStack.Push(view);
-            int order = (uiStack.Count - 1) * UIDefine.ORDER_VIEW_ADD + baseOrde;
-            view.SetOrder(order);
+            int order = (uiStack.Count - 1) * UIDefine.ORDER_VIEW_ADD + baseOrder;
+            view.SetCanvasOrder(order);
 
             await view.StartAsync(args);
             action?.Invoke();
@@ -118,7 +118,7 @@ namespace HaloFrame
             action?.Invoke();
         }
 
-        internal void Remove(UIViewType type)
+        internal void Remove(ViewType type)
         {
             throw new NotImplementedException();
         }

@@ -1,17 +1,23 @@
+/*******************************************************
+** auth:  https://github.com/gsm958708323
+** date:  2024/07/20 22:14:21
+** dsec:  UIView_LifeCycle 
+管理View的生命周期
+Async相关方法是处理需要等待的任务，如动画播放，加载等
+生命周期：LoadAsset - Awake - Start - Enable - Disable - Destroy - ReleaseUI
+UIView 
+    - UIGameView 游戏界面
+    - UISubView 子界面
+*******************************************************/
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 
 namespace HaloFrame
 {
-    /// <summary>
-    /// Async相关方法是处理需要等待的任务，如动画播放，加载等
-    /// 生命周期：LoadAsset - Awake - Start - Enable - Disable - Destroy - ReleaseUI
-    /// </summary>
-    public class UIView
+    public partial class UIView
     {
         public GameObject gameObject;
         public Transform transform;
@@ -20,7 +26,7 @@ namespace HaloFrame
         public UILayer UILayer;
 
         public UIState UIState { get; internal set; }
-        public TaskCompletionSource<bool> TaskResult { get; private set; }
+        public TaskCompletionSource<bool> LoadTask { get; private set; }
         public int SortingOrder { get; private set; }
 
         /// <summary>
@@ -32,7 +38,7 @@ namespace HaloFrame
         {
             UIState = UIState.None;
             canvasDict = new Dictionary<Canvas, int>();
-            TaskResult = new TaskCompletionSource<bool>();
+            LoadTask = new TaskCompletionSource<bool>();
         }
 
         public void Bind(UIConfig config, UILayer layer)
@@ -48,7 +54,7 @@ namespace HaloFrame
             rectTransform = null;
             UIConfig = null;
             UILayer = null;
-            TaskResult = null;
+            LoadTask = null;
             canvasDict = null;
         }
 
@@ -68,7 +74,7 @@ namespace HaloFrame
         /// 这里写GameObject相关的操作
         /// </summary>
         /// <param name="go"></param>
-        internal void LoadAsset(GameObject go)
+        internal void OnLoadAsset(GameObject go)
         {
             gameObject = go;
             transform = go.transform;
@@ -90,7 +96,7 @@ namespace HaloFrame
             // 动画信息初始化
         }
 
-        internal void SetOrder(int order)
+        internal void SetCanvasOrder(int order)
         {
             SortingOrder = order;
             foreach (var item in canvasDict)
@@ -99,7 +105,7 @@ namespace HaloFrame
             }
         }
 
-        internal void Awake()
+        internal virtual void Awake()
         {
             if (UIState <= UIState.Loading)
             {
@@ -201,7 +207,7 @@ namespace HaloFrame
             }
         }
 
-        internal void Destroy()
+        internal virtual void Destroy()
         {
             if (UIState <= UIState.Loading)
             {

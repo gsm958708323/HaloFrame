@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 namespace HaloFrame
 {
@@ -12,9 +13,9 @@ namespace HaloFrame
         /// <summary>
         /// 存储UI界面对应的类
         /// </summary>
-        private Dictionary<UIViewType, Type> uiDict;
-        private Dictionary<UILayerType, UILayer> layerDict;
-        private HashSet<UIViewType> openSet;
+        private Dictionary<ViewType, Type> uiDict;
+        private Dictionary<LayerType, UILayer> layerDict;
+        private HashSet<ViewType> openSet;
         private Camera worldCamera, uiCamera;
         public int width = 1920;
         public int height = 1080;
@@ -50,10 +51,10 @@ namespace HaloFrame
             uiCamera.clearFlags = CameraClearFlags.Depth;
 
             // 创建layer层级对象，指定UI相机
-            var layers = Enum.GetValues(typeof(UILayerType));
-            foreach (UILayerType layer in layers)
+            var layers = Enum.GetValues(typeof(LayerType));
+            foreach (LayerType layer in layers)
             {
-                bool is3d = layer == UILayerType.SceneLayer;
+                bool is3d = layer == LayerType.SceneLayer;
                 Canvas canvas = UIExtension.CreateLayerCanvas(layer, is3d, root.transform, is3d ? worldCamera : uiCamera, UIDefine.WIDTH, UIDefine.HEIGHT);
                 var uILayer = new UILayer(layer, canvas);
                 layerDict.Add(layer, uILayer);
@@ -61,7 +62,7 @@ namespace HaloFrame
 
             // 根据脚本名称找到对应界面类
             Assembly assembly = Assembly.GetExecutingAssembly();
-            var configDict = UIConfigSO.Get();
+            var configDict = UIConfigSO.GetAll();
             foreach (var item in configDict)
             {
                 if (!layerDict.ContainsKey(item.Value.LayerType))
@@ -80,14 +81,11 @@ namespace HaloFrame
             }
         }
 
-        public void Open(UIViewType type, Action action = null, params object[] args)
+        public void Open(ViewType type, Action action = null, params object[] args)
         {
-            var configDict = UIConfigSO.Get();
-            if (!configDict.TryGetValue(type, out var config))
-            {
-                Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
+            var config = UIConfigSO.Get(type);
+            if (config == null)
                 return;
-            }
             if (!uiDict.TryGetValue(type, out var uiView))
             {
                 Debugger.LogError($"界面对象不存在 {type}", LogDomain.UI);
@@ -102,14 +100,11 @@ namespace HaloFrame
             layer.Open(type, action, args);
         }
 
-        public void Close(UIViewType type)
+        public void Close(ViewType type)
         {
-            var configDict = UIConfigSO.Get();
-            if (!configDict.TryGetValue(type, out var config))
-            {
-                Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
+            var config = UIConfigSO.Get(type);
+            if (config == null)
                 return;
-            }
             if (!layerDict.TryGetValue(config.LayerType, out var layer))
             {
                 Debugger.LogError($"界面层级不存在 {config.LayerType}", LogDomain.UI);
@@ -119,7 +114,7 @@ namespace HaloFrame
             layer.Pop();
         }
 
-        internal UIView CreateUI(UIViewType type, UILayer layer)
+        internal UIView CreateUI(ViewType type, UILayer layer)
         {
             if (!uiDict.TryGetValue(type, out var viewType))
             {
@@ -127,16 +122,26 @@ namespace HaloFrame
                 return null;
 
             }
-            var configDict = UIConfigSO.Get();
-            if (!configDict.TryGetValue(type, out var config))
-            {
-                Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
+            var config = UIConfigSO.Get(type);
+            if (config == null)
                 return null;
-            }
 
-            var view = (UIView)Activator.CreateInstance(viewType);
+            var view = (UIGameView)Activator.CreateInstance(viewType);
             view.Bind(config, layer);
-            // todo 子界面
+
+            if (config.ChildList != null)
+            {
+                foreach (var item in config.ChildList)
+                {
+                    var subConfig = UIConfigSO.Get(item);
+                    if (subConfig == null)
+                        continue;
+
+                    UISubView subView = (UISubView)Activator.CreateInstance(viewType);
+                    subView.Bind(subConfig, layer);
+                    view.AddChild(subConfig.ViewType, subView);
+                }
+            }
             return view;
         }
 
@@ -152,7 +157,18 @@ namespace HaloFrame
 
         private async Task LoadChildIUI(UIView view)
         {
-
+            // 有些子界面跟随父界面一起加载
+            if (view.UIConfig.ChildList.Count > 0 && view.UIConfig.LoadWithParent && view is UIGameView gameView)
+            {
+                foreach (var childType in view.UIConfig.ChildList)
+                {
+                    var child = gameView.FindChild(childType);
+                    if (child != null)
+                    {
+                        await LoadUIAsync(child);
+                    }
+                }
+            }
         }
 
         private Task LoadUITask(UIView view)
@@ -161,20 +177,48 @@ namespace HaloFrame
             {
                 LoadAsset(view);
             }
-            return view.TaskResult.Task;
+            return view.LoadTask.Task;
         }
 
         private void LoadAsset(UIView view)
         {
-            // todo 支持两种加载方式：动态加载，代码指定Gameobject
+            // 支持两种加载方式：动态加载，代码指定Gameobject
             view.UIState = UIState.Loading;
-            GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.Prefab);
-            var go = GameObject.Instantiate(prefab);
-            view.LoadAsset(go);
-
-            if (view.TaskResult != null)
+            if (view.UIConfig.ResType == ResType.Dynamic)
             {
-                view.TaskResult.SetResult(true);
+                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.Prefab);
+                var go = GameObject.Instantiate(prefab);
+                view.OnLoadAsset(go);
+            }
+            else
+            {
+                // 子界面 和 Item都需要有Parent
+                if (view is UISubView subView)
+                {
+                    if (subView.Parent == null)
+                    {
+                        Debugger.LogError($"子界面没有Parent {subView.UIConfig.ViewType}");
+                        return;
+                    }
+                    subView.UIState = UIState.Loading;
+                    var childGo = subView.Parent.gameObject.FindEx(subView.UIConfig.ViewType.ToString());
+                    if (childGo == null)
+                    {
+                        Debugger.LogError($"子节点不存在 {subView.UIConfig.ViewType} {subView.Parent.UIConfig.ViewType}");
+                        return;
+                    }
+                    subView.OnLoadAsset(childGo);
+                }
+                else
+                {
+                    Debugger.LogError($"查找已有节点作为界面资源，必须是子界面 {view.UIConfig.ViewType}");
+                }
+            }
+
+
+            if (view.LoadTask != null)
+            {
+                view.LoadTask.SetResult(true);
             }
         }
 
