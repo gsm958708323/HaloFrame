@@ -8,5 +8,6 @@ public class ChildView1 : UISubView
 {
     protected override void OnAwake()
     {
+        base.OnAwake();
     }
 }

@@ -7,6 +7,7 @@ public enum ViewType
     None,
     FullView1,
     FullView2,
+    FullView2_Top,
     TipsView1,
     TipsView2,
     ChildView1,

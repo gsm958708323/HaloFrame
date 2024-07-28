@@ -41,6 +41,18 @@ namespace HaloFrame
             base.Destroy();
         }
 
+        internal override void Enable()
+        {
+            base.Enable();
+            EnableChild();
+        }
+
+        internal override void Disable()
+        {
+            DisableChild();
+            base.Disable();
+        }
+
         public void OpenChild(ViewType viewType, Action callback = null, params object[] args)
         {
             UISubView subVIew = FindChild(viewType);
@@ -108,7 +120,7 @@ namespace HaloFrame
             if (!showList.Contains(subView))
                 showList.Add(subView);
 
-            var order = subView.Parent.SortingOrder + (showList.Count - 1) * UIDefine.ORDER_SUBVIEW_ADD;
+            var order = subView.Parent.SortingOrder + showList.Count * UIDefine.ORDER_SUBVIEW_ADD;
             subView.SetCanvasOrder(order);
             if (subView.UIState == UIState.Awake)
             {
@@ -173,7 +185,23 @@ namespace HaloFrame
             childDict.Remove(viewType);
         }
 
-        public void AwakeChild()
+        private void DisableChild()
+        {
+            foreach (var item in showList)
+            {
+                item.Disable();
+            }
+        }
+
+        private void EnableChild()
+        {
+            foreach (var item in showList)
+            {
+                item.Enable();
+            }
+        }
+
+        private void AwakeChild()
         {
             foreach (var item in childDict)
             {
@@ -185,7 +213,7 @@ namespace HaloFrame
             }
         }
 
-        public void DestroyChild()
+        private void DestroyChild()
         {
             showList.Clear();
             foreach (var item in childDict)

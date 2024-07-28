@@ -114,7 +114,10 @@ namespace HaloFrame
                 ActiveGameObject(false);
             }
         }
-        protected virtual void OnAwake() { }
+        protected virtual void OnAwake()
+        {
+            Debugger.Log($"{this.GetType().Name} OnAwake", LogDomain.UI);
+        }
 
         internal async Task StartAsync(object[] args)
         {
@@ -130,7 +133,7 @@ namespace HaloFrame
             }
         }
 
-        public void Start(object[] args)
+        internal void Start(object[] args)
         {
             if (UIState == UIState.Awake)
             {
@@ -140,7 +143,10 @@ namespace HaloFrame
                 OnStart(args);
             }
         }
-        protected virtual void OnStart(object[] args) { }
+        protected virtual void OnStart(object[] args)
+        {
+            Debugger.Log($"{this.GetType().Name} OnStart", LogDomain.UI);
+        }
         internal async Task EnableAsync()
         {
             if (UIState <= UIState.Loading)
@@ -154,7 +160,7 @@ namespace HaloFrame
                 await WaitAnimation();
             }
         }
-        private void Enable()
+        internal virtual void Enable()
         {
             if (UIState == UIState.Start || UIState == UIState.Disable)
             {
@@ -164,7 +170,10 @@ namespace HaloFrame
                 OnEnable();
             }
         }
-        protected virtual void OnEnable() { }
+        protected virtual void OnEnable()
+        {
+            Debugger.Log($"{this.GetType().Name} OnEnable", LogDomain.UI);
+        }
 
         internal async Task DisableAsync()
         {
@@ -178,7 +187,7 @@ namespace HaloFrame
                 Disable();
             }
         }
-        private void Disable()
+        internal virtual void Disable()
         {
             if (UIState <= UIState.Loading)
             {
@@ -191,7 +200,10 @@ namespace HaloFrame
                 ActiveGameObject(false);
             }
         }
-        protected virtual void OnDisable() { }
+        protected virtual void OnDisable()
+        {
+            Debugger.Log($"{this.GetType().Name} OnDisable", LogDomain.UI);
+        }
 
         internal async Task DestroyAsync()
         {
@@ -228,7 +240,10 @@ namespace HaloFrame
             }
         }
 
-        protected virtual void OnDestroy() { }
+        protected virtual void OnDestroy()
+        {
+            Debugger.Log($"{this.GetType().Name} OnDestroy", LogDomain.UI);
+        }
 
         private async Task WaitAnimation()
         {

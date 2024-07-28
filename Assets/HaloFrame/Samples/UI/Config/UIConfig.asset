@@ -18,40 +18,47 @@ MonoBehaviour:
     ResType: 0
     IsPopup: 0
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab
-    ChildList: 0500000006000000
+    ChildList: 0600000007000000
     LoadWithParent: 0
   - ViewType: 2
-    LayerType: 5000
+    LayerType: 3000
     ResType: 0
     IsPopup: 0
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab
     ChildList: 
     LoadWithParent: 0
-  - ViewType: 3
+  - ViewType: 4
     LayerType: 3000
     ResType: 0
     IsPopup: 1
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab
     ChildList: 
     LoadWithParent: 0
-  - ViewType: 4
+  - ViewType: 5
     LayerType: 5000
     ResType: 0
     IsPopup: 1
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab
     ChildList: 
     LoadWithParent: 0
-  - ViewType: 5
-    LayerType: 3000
-    ResType: 1
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab
-    ChildList: 
-    LoadWithParent: 0
   - ViewType: 6
     LayerType: 3000
     ResType: 0
     IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab
+    ChildList: 
+    LoadWithParent: 0
+  - ViewType: 7
+    LayerType: 3000
+    ResType: 0
+    IsPopup: 0
     Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab
+    ChildList: 
+    LoadWithParent: 0
+  - ViewType: 3
+    LayerType: 5000
+    ResType: 0
+    IsPopup: 0
+    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab
     ChildList: 
     LoadWithParent: 0
