@@ -413,6 +413,7 @@ GameObject:
   - component: {fileID: 5610574459712128123}
   - component: {fileID: 9059204024600386173}
   - component: {fileID: 6981508750327812774}
+  - component: {fileID: -2551967022878971035}
   m_Layer: 5
   m_Name: FullView1
   m_TagString: Untagged
@@ -521,6 +522,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 55
+--- !u!225 &-2551967022878971035
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610574459712128117}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &6253630340656162425
 GameObject:
   m_ObjectHideFlags: 0

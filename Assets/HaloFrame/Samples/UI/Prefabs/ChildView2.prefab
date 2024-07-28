@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6415796173626777549}
   - component: {fileID: 8150122793376155945}
   - component: {fileID: 8257780630201361237}
+  - component: {fileID: 963221027394640492}
   m_Layer: 5
   m_Name: ChildView2
   m_TagString: Untagged
@@ -88,6 +89,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 55
+--- !u!225 &963221027394640492
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554610324199908758}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1647363987998773341
 GameObject:
   m_ObjectHideFlags: 0

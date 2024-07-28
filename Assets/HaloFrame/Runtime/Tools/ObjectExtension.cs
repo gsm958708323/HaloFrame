@@ -50,6 +50,17 @@ namespace HaloFrame
                 gameObject.SetActive(active);
         }
 
+        public static void SetActiveCanvas(this GameObject gameObject, bool active)
+        {
+            var canvas = gameObject.GetComponent<CanvasGroup>();
+            if (canvas != null)
+            {
+                canvas.alpha = active ? 1 : 0;
+                canvas.interactable = active;
+                canvas.blocksRaycasts = active;
+            }
+        }
+
         public static void SetActiveScale(this GameObject gameObject, bool active)
         {
             gameObject.transform.localScale = active ? Vector3.one : Vector3.zero;

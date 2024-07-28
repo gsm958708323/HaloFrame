@@ -211,6 +211,7 @@ GameObject:
   - component: {fileID: 5610574459712128123}
   - component: {fileID: 72014627224880681}
   - component: {fileID: 540154716464766935}
+  - component: {fileID: 8726284911310398236}
   m_Layer: 5
   m_Name: TipsView1
   m_TagString: Untagged
@@ -317,6 +318,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 55
+--- !u!225 &8726284911310398236
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610574459712128117}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7857380719762283169
 GameObject:
   m_ObjectHideFlags: 0

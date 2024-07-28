@@ -62,7 +62,7 @@ namespace HaloFrame
         {
             if (gameObject != null)
             {
-                gameObject.SetActiveEx(active);
+                gameObject.SetActiveCanvas(active);
             }
         }
 

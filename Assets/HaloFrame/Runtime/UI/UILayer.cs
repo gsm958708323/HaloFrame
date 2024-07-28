@@ -1,3 +1,11 @@
+/*******************************************************
+** auth:  https://github.com/gsm958708323
+** date:  2024/07/28 18:13:56
+** dsec:  UILayer 
+界面根据不同层级，划分到不同的UILayer中管理
+UILayer使用CustomStack来管理全屏与弹窗界面
+新界面如果是弹窗则不做处理，如果是全屏界面，则要关闭上一个界面
+*******************************************************/
 using System;
 using System.Collections;
 using System.Collections.Generic;
