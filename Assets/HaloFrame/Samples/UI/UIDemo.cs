@@ -25,6 +25,10 @@ public class UIDemo : MonoBehaviour
         {
             GameManager.UI.Open(ViewType.FullView2);
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            GameManager.UI.Open(ViewType.ChildView2);
+        }
 
 
         // Top层

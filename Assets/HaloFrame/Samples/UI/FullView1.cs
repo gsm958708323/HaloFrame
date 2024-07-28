@@ -25,4 +25,11 @@ public class FullView1 : UIGameView
             OpenOneChildUi(ViewType.ChildView2);
         });
     }
+
+    protected override void OnStart(object[] args)
+    {
+        base.OnStart(args);
+
+        OpenChild(ViewType.ChildView1);
+    }
 }

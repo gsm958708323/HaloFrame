@@ -53,6 +53,11 @@ namespace HaloFrame
             base.Disable();
         }
 
+        protected virtual void CloseSelf()
+        {
+            GameManager.UI.Close(UIConfig.ViewType);
+        }
+
         public void OpenChild(ViewType viewType, Action callback = null, params object[] args)
         {
             UISubView subVIew = FindChild(viewType);

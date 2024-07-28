@@ -65,10 +65,7 @@ namespace HaloFrame
                 gameObject.SetActiveEx(active);
             }
         }
-        protected void CloseSelf()
-        {
-            GameManager.UI.Close(UIConfig.ViewType);
-        }
+
 
         /// <summary>
         /// 这里写GameObject相关的操作
