@@ -9,7 +9,6 @@ namespace HaloFrame
     public class UIManager : IManager
     {
         private Dictionary<LayerType, UILayer> layerDict;
-        private HashSet<ViewType> openSet;
         private Camera worldCamera, uiCamera;
         public int width = 1920;
         public int height = 1080;
@@ -18,7 +17,6 @@ namespace HaloFrame
         {
             base.Init();
             layerDict = new();
-            openSet = new();
 
             InitConfig();
             InitUI();
@@ -157,39 +155,47 @@ namespace HaloFrame
 
         private void LoadAsset(UIView view)
         {
-            // 支持两种加载方式：动态加载，代码指定Gameobject
-            if (view.UIConfig.ResType == ResType.Dynamic)
+            if (view is UISubView subView)
             {
-                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.ResId);
-                var go = GameObject.Instantiate(prefab);
-                var parent = view.UILayer.Canvas.transform;
-                view.OnLoadAsset(go, parent);
-            }
-            else
-            {
-                // 子界面 和 Item都需要有Parent
-                if (view is UISubView subView)
+                // 支持两种加载方式：动态加载 | 查找节点
+                GameObject childGo;
+                Transform parent;
+                if (subView.ResType == ResType.Dynamic)
+                {
+                    GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(subView.UIConfig.ResId);
+                    childGo = GameObject.Instantiate(prefab);
+                    parent = subView.UILayer.Canvas.transform;
+                }
+                else
                 {
                     if (subView.Parent == null)
                     {
                         Debugger.LogError($"子界面没有Parent {subView}");
                         return;
                     }
-                    var childGo = subView.Parent.gameObject.FindEx(subView.ToString());
-                    if (childGo == null)
-                    {
-                        Debugger.LogError($"子节点不存在 {subView} {subView.Parent}");
-                        return;
-                    }
-                    var parent = subView.UILayer.Canvas.transform;
-                    subView.OnLoadAsset(childGo, parent);
+                    childGo = subView.Parent.gameObject.FindEx(subView.ToString());
+                    parent = subView.Parent.UILayer.Canvas.transform;
                 }
-                else
-                {
-                    Debugger.LogError($"查找已有节点作为界面资源，必须是子界面 {view}");
-                }
-            }
 
+                if (childGo == null)
+                {
+                    Debugger.LogError($"子节点不存在 {subView}");
+                    return;
+                }
+                subView.OnLoadAsset(childGo, parent);
+            }
+            else if (view is UIGameView gameView)
+            {
+                if (view.UIConfig.ResId == 0)
+                {
+                    Debugger.LogError($"界面的ResId为0 {gameView}", LogDomain.UI);
+                    return;
+                }
+                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.ResId);
+                var go = GameObject.Instantiate(prefab);
+                var parent = view.UILayer.Canvas.transform;
+                view.OnLoadAsset(go, parent);
+            }
 
             if (view.LoadTask != null)
             {

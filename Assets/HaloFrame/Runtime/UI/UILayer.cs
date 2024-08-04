@@ -125,10 +125,5 @@ namespace HaloFrame
 
             action?.Invoke();
         }
-
-        internal void Remove(ViewType type)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

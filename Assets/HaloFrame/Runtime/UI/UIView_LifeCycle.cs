@@ -23,7 +23,6 @@ namespace HaloFrame
         public Transform transform;
         public RectTransform rectTransform;
         public UIConfig UIConfig;
-        public ResConfig ResConfig;
         public UILayer UILayer;
 
         public UIState UIState { get; internal set; }
@@ -97,6 +96,7 @@ namespace HaloFrame
         internal void SetCanvasOrder(int order)
         {
             SortingOrder = order;
+            // 这里会包含自己和所有子节点的canvas
             foreach (var item in canvasDict)
             {
                 item.Key.sortingOrder = item.Value + order;

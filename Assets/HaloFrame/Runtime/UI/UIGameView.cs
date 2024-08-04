@@ -18,14 +18,14 @@ namespace HaloFrame
         /// <summary>
         /// 存储子界面的界面实例
         /// </summary>
-        private Dictionary<Type, UISubView> childDict=new();
+        private Dictionary<Type, UISubView> childDict = new();
         /// <summary>
         /// 当前正在显示的界面
         /// </summary>
         /// <typeparam name="UISubView"></typeparam>
         /// <returns></returns>
-        private List<UISubView> showList=new();
-        private List<UIItem> itemList=new();
+        private List<UISubView> showList = new();
+        private List<UIItem> itemList = new();
 
         internal override void Awake()
         {
@@ -60,20 +60,33 @@ namespace HaloFrame
             GameManager.UI.Close(GetType());
         }
 
-        public UIItem CreateItem<T>(GameObject go = null)
+        public UIItem CreateItem<T>(int resId = 0)
                     where T : UIItem, new()
         {
             // 创建实例
-            var item = (UIItem)Activator.CreateInstance(typeof(T));
+            var item = (UIItem)AssemblyTools.CreateInstance(typeof(T));
+            if (item == null)
+                return null;
+
             itemList.Add(item);
             item.Parent = this;
 
             // 创建go
             item.UIState = UIState.Loading;
+            GameObject go;
+            if (resId != 0)
+            {
+                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(resId);
+                go = GameObject.Instantiate(prefab);
+            }
+            else
+            {
+                go = gameObject.FindEx(item.ToString());
+            }
             if (go == null)
             {
-                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(ResConfig.ResPath);
-                go = GameObject.Instantiate(prefab);
+                Debugger.LogError($"创建item失败 未找到对应预制体 {item}", LogDomain.UI);
+                return null;
             }
             item.OnLoadAsset(go, transform);
             item.Awake();
@@ -106,7 +119,7 @@ namespace HaloFrame
             }
         }
 
-        public void OpenChild<T>(Action callback = null, params object[] args)
+        public void OpenChild<T>(ResType resType = ResType.Dynamic, Action callback = null, params object[] args)
         {
             var viewType = typeof(T);
             UISubView subVIew = FindChild(viewType);
@@ -116,6 +129,7 @@ namespace HaloFrame
                 return;
             }
 
+            subVIew.ResType = resType;
             OpenAsync(subVIew, callback, args);
         }
 
@@ -124,13 +138,13 @@ namespace HaloFrame
         /// </summary>
         /// <param name="viewType"></param>
         /// <param name="args"></param>
-        public void OpenOneChildUI<T>(params object[] args)
+        public void OpenOneChildUI<T>(ResType resType = ResType.Dynamic, Action callback = null, params object[] args)
         {
             var viewType = typeof(T);
-            OpenOneChildUiAsync(viewType, args);
+            OpenOneChildUiAsync(viewType, resType, callback, args);
         }
 
-        private async void OpenOneChildUiAsync(Type viewType, object[] args)
+        private void OpenOneChildUiAsync(Type viewType, ResType resType, Action callback = null, params object[] args)
         {
             UISubView subView = FindChild(viewType);
             if (subView == null)
@@ -138,9 +152,7 @@ namespace HaloFrame
                 Debugger.LogError($"子界面不存在 {viewType}");
                 return;
             }
-
-            await WaitChildAnimation();
-            await GameManager.UI.LoadUIAsync(subView);
+            subView.ResType = resType;
 
             var isShow = false;
             // 关闭其他界面
@@ -150,7 +162,6 @@ namespace HaloFrame
                 var childType = child.GetType();
                 if (childType != viewType)
                 {
-                    // todo 测试
                     CloseChild(childType);
                 }
                 else
@@ -158,12 +169,11 @@ namespace HaloFrame
                     isShow = true;
                 }
             }
-            await WaitChildAnimation();
 
             // 没有显示才重新打开
             if (!isShow)
             {
-                OpenAsync(subView, null, args);
+                OpenAsync(subView, callback, args);
             }
         }
 
@@ -177,7 +187,10 @@ namespace HaloFrame
             if (!showList.Contains(subView))
                 showList.Add(subView);
 
-            var order = subView.Parent.SortingOrder + showList.Count * UIDefine.ORDER_SUBVIEW_ADD;
+            // 动态创建的界面需要加上父界面的order，然后和父界面同级
+            var add = subView.ResType == ResType.Dynamic ? subView.Parent.SortingOrder : 0;
+            var order = showList.Count * UIDefine.ORDER_SUBVIEW_ADD + add;
+
             subView.SetCanvasOrder(order);
             if (subView.UIState == UIState.Awake)
             {

@@ -17,22 +17,23 @@ public class FullView1 : UIGameView
 
         transform.Find("ChildBtn1").GetComponent<Button>().onClick.AddListener(() =>
         {
-            OpenOneChildUI<ChildView1>();
+            OpenOneChildUI<ChildView1>(ResType.Static);
         });
 
         transform.Find("ChildBtn2").GetComponent<Button>().onClick.AddListener(() =>
         {
             OpenOneChildUI<ChildView2>();
         });
-
-        // var item = CreateItem<TestItem>();
-        // item.Start(new object[] { 1 }); // 优化参数传递
     }
 
     protected override void OnStart(object[] args)
     {
         base.OnStart(args);
 
-        OpenChild<ChildView1>();
+        var item2 = CreateItem<ButtonItem>();
+        item2.Start(new object[] { 2 });
+
+        var item = CreateItem<ButtonItem>(2001);
+        item.Start(new object[] { 1 });
     }
 }

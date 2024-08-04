@@ -24,10 +24,6 @@ namespace HaloFrame
         /// </summary>
         public bool IsPopup;
         public int ResId;
-        /// <summary>
-        /// 界面生成方式
-        /// </summary>
-        public ResType ResType = ResType.Dynamic;
         public List<string> ChildList;
         public bool LoadWithParent = false;
     }

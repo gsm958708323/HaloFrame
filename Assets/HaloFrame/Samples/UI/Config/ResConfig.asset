@@ -27,3 +27,5 @@ MonoBehaviour:
     ResPath: Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab
   - ResId: 1007
     ResPath: Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab
+  - ResId: 2001
+    ResPath: Assets/HaloFrame/Samples/UI/Prefabs/ButtonItem.prefab
