@@ -6,7 +6,6 @@ UILayer使用CustomStack来管理全屏与弹窗界面
 
 新界面如果是弹窗则不做处理，如果是全屏界面，则要关闭上一个界面
 
-
 ## UI生命周期
 LoadAsset - Awake - Start - Enable - Disable - Destroy - ReleaseUI
 

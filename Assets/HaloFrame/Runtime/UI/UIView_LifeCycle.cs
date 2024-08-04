@@ -23,6 +23,7 @@ namespace HaloFrame
         public Transform transform;
         public RectTransform rectTransform;
         public UIConfig UIConfig;
+        public ResConfig ResConfig;
         public UILayer UILayer;
 
         public UIState UIState { get; internal set; }
@@ -58,7 +59,7 @@ namespace HaloFrame
             canvasDict = null;
         }
 
-        private void ActiveGameObject(bool active)
+        public void SetActive(bool active)
         {
             if (gameObject != null)
             {
@@ -71,15 +72,15 @@ namespace HaloFrame
         /// 这里写GameObject相关的操作
         /// </summary>
         /// <param name="go"></param>
-        internal void OnLoadAsset(GameObject go)
+        internal void OnLoadAsset(GameObject go, Transform parent)
         {
             gameObject = go;
             transform = go.transform;
             rectTransform = go.GetComponent<RectTransform>();
-            ActiveGameObject(false);
+            SetActive(false);
 
             // 设置父节点
-            go.transform.SetParentEx(UILayer.Canvas.transform);
+            go.transform.SetParentEx(parent);
             go.transform.SetAsLastSibling();
 
             // 子节点canvas信息初始化
@@ -108,7 +109,7 @@ namespace HaloFrame
             {
                 UIState = UIState.Awake;
                 OnAwake();
-                ActiveGameObject(false);
+                SetActive(false);
             }
         }
         protected virtual void OnAwake()
@@ -135,7 +136,7 @@ namespace HaloFrame
             if (UIState == UIState.Awake)
             {
                 UIState = UIState.Start;
-                ActiveGameObject(true);
+                SetActive(true);
 
                 OnStart(args);
             }
@@ -162,7 +163,7 @@ namespace HaloFrame
             if (UIState == UIState.Start || UIState == UIState.Disable)
             {
                 UIState = UIState.Enable;
-                ActiveGameObject(true);
+                SetActive(true);
 
                 OnEnable();
             }
@@ -194,7 +195,7 @@ namespace HaloFrame
             {
                 UIState = UIState.Disable;
                 OnDisable();
-                ActiveGameObject(false);
+                SetActive(false);
             }
         }
         protected virtual void OnDisable()

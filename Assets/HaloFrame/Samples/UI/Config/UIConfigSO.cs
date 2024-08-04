@@ -1,48 +1,51 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using HaloFrame;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "UIConfig", menuName = "UI/UIConfig", order = 1)]
-public class UIConfigSO : ScriptableObject
+[CreateAssetMenu(fileName = "UIConfig", menuName = "UI/UIConfigSO", order = 1)]
+public class UIConfigSO : SerializedScriptableObject
 {
-    public List<UIConfig> uiConfigs;
+    public Dictionary<string, UIConfig> uiConfigs = new();
+    private static Dictionary<Type, UIConfig> cache;
 
-    private static Dictionary<ViewType, UIConfig> configDict;
-    public static Dictionary<ViewType, UIConfig> GetAll()
+    public static void Init()
     {
-        if (configDict == null)
+        var path = "Assets/HaloFrame/Samples/UI/Config/UIConfig.asset";
+        var so = GameManager.Resource.LoadAsset<UIConfigSO>(path);
+        if (so == null)
+            return;
+
+        cache = new();
+        foreach (var item in so.uiConfigs)
         {
-            var path = "Assets/HaloFrame/Samples/UI/Config/UIConfig.asset";
-            var so = GameManager.Resource.LoadAsset<UIConfigSO>(path);
-            if (so == null)
-                return null;
-
-            configDict = new Dictionary<ViewType, UIConfig>();
-            foreach (var item in so.uiConfigs)
+            Type type = AssemblyTools.GetType(item.Key.ToString());
+            if (cache.ContainsKey(type))
             {
-                if (configDict.ContainsKey(item.ViewType))
-                {
-                    Debugger.LogError($"界面类型重复 {item.ViewType}", LogDomain.UI);
-                    continue;
-                }
-
-                configDict.Add(item.ViewType, item);
+                Debugger.LogError($"界面类型重复 {type}", LogDomain.UI);
+                continue;
             }
-        }
 
-        return configDict;
+            cache.Add(type, item.Value);
+        }
     }
 
-    public static UIConfig Get(ViewType viewType)
+    public static Dictionary<Type, UIConfig> GetAll()
+    {
+        return cache;
+    }
+
+    public static UIConfig Get(Type type)
     {
         var all = GetAll();
-        if (all == null)
+        if (!all.ContainsKey(type))
         {
-            Debugger.LogError($"界面配置不存在 {viewType}", LogDomain.UI);
+            Debugger.LogError($"界面配置不存在 {type}", LogDomain.UI);
             return null;
         }
 
-        return all[viewType];
+        return all[type];
     }
 }

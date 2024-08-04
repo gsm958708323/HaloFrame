@@ -13,6 +13,12 @@ namespace HaloFrame
             return AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
 
+        public T LoadAsset<T>(int resId) where T : UnityEngine.Object
+        {
+            var config = ResConfigSO.Get(resId);
+            return LoadAsset<T>(config.ResPath);
+        }
+
         public void UnloadAsset(GameObject asset)
         {
             Object.Destroy(asset);

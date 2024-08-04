@@ -1,4 +1,21 @@
 ﻿# UI框架
+## 功能测试
+测试全屏界面和弹窗界面的遮挡关系：
+- 界面打开顺序 FullView1 - TipsView1 - FullView2
+- 依次关闭界面，查看界面生命周期
+
+测试不同层级下的UI遮挡
+- 界面打开顺序 FullView1 - TipsView1 - FullView2_Top
+- 依次关闭界面
+
+测试子界面
+- 打开FullView1 - 打开子界面 ChildView1 - 打开子界面ChildView2 - 打开FullView2
+- 依次关闭界面，查看生命周期
+
+子界面独立打开：
+- 界面配置关系
+- 打开界面FullView1， 单独打开界面ChildView2
+
 ## UI层级管理
 界面根据不同层级，划分到不同的UILayer中管理
 
@@ -9,6 +26,7 @@ UILayer使用CustomStack来管理全屏与弹窗界面
 
 ## UI生命周期
 LoadAsset - Awake - Start - Enable - Disable - Destroy - ReleaseUI
+不继承于MonoBehaviour，独立生命周期管理
 
 UIView
  - UIGameView 游戏界面

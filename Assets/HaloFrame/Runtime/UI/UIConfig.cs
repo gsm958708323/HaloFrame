@@ -9,7 +9,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace HaloFrame
 {
@@ -17,26 +16,26 @@ namespace HaloFrame
     public class UIConfig
     {
         /// <summary>
-        /// 界面唯一id
-        /// </summary>
-        public ViewType ViewType;
-        /// <summary>
         /// 界面所属层级
         /// </summary>
         public LayerType LayerType;
         /// <summary>
+        /// 是弹窗还是全屏界面
+        /// </summary>
+        public bool IsPopup;
+        public int ResId;
+        /// <summary>
         /// 界面生成方式
         /// </summary>
         public ResType ResType = ResType.Dynamic;
-        /// <summary>
-        /// 是弹窗还是全屏界面
-        /// </summary>
-        public bool IsPopup; // 是否为弹窗
-        /// <summary>
-        /// 预制体路径
-        /// </summary>
-        public string Prefab;
-        public List<ViewType> ChildList;
+        public List<string> ChildList;
         public bool LoadWithParent = false;
+    }
+
+    [System.Serializable]
+    public class ResConfig
+    {
+        public int ResId;
+        public string ResPath;
     }
 }

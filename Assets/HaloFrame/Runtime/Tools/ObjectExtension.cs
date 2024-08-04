@@ -94,8 +94,8 @@ namespace HaloFrame
             // 递归遍历，找到则返回
             while (list.Count > index)
             {
-                var transform = list[index];
-                for (int i = 0; i < transform.childCount; i++)
+                var transform = list[index++];
+                for (int i = 0; i < transform.childCount; ++i)
                 {
                     var child = transform.GetChild(i);
                     if (child.name == name)

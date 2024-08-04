@@ -3,12 +3,13 @@
 ** date:  2024/07/21 14:53:57
 ** dsec:  UIGameView 
 管理子界面生命周期
-夫界面存在时，子界面不会销毁，只会隐藏
+父界面存在时，子界面不会销毁，只会隐藏
 *******************************************************/
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace HaloFrame
 {
@@ -17,16 +18,14 @@ namespace HaloFrame
         /// <summary>
         /// 存储子界面的界面实例
         /// </summary>
-        /// <typeparam name="ViewType"></typeparam>
-        /// <typeparam name="UISubView"></typeparam>
-        /// <returns></returns>
-        private Dictionary<ViewType, UISubView> childDict = new Dictionary<ViewType, UISubView>();
+        private Dictionary<Type, UISubView> childDict=new();
         /// <summary>
         /// 当前正在显示的界面
         /// </summary>
         /// <typeparam name="UISubView"></typeparam>
         /// <returns></returns>
-        private List<UISubView> showList = new List<UISubView>();
+        private List<UISubView> showList=new();
+        private List<UIItem> itemList=new();
 
         internal override void Awake()
         {
@@ -38,6 +37,7 @@ namespace HaloFrame
         internal override void Destroy()
         {
             DestroyChild();
+            DestroyItem();
             base.Destroy();
         }
 
@@ -45,21 +45,70 @@ namespace HaloFrame
         {
             base.Enable();
             EnableChild();
+            EnableItem();
         }
 
         internal override void Disable()
         {
             DisableChild();
+            DisableItem();
             base.Disable();
         }
 
         protected virtual void CloseSelf()
         {
-            GameManager.UI.Close(UIConfig.ViewType);
+            GameManager.UI.Close(GetType());
         }
 
-        public void OpenChild(ViewType viewType, Action callback = null, params object[] args)
+        public UIItem CreateItem<T>(GameObject go = null)
+                    where T : UIItem, new()
         {
+            // 创建实例
+            var item = (UIItem)Activator.CreateInstance(typeof(T));
+            itemList.Add(item);
+            item.Parent = this;
+
+            // 创建go
+            item.UIState = UIState.Loading;
+            if (go == null)
+            {
+                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(ResConfig.ResPath);
+                go = GameObject.Instantiate(prefab);
+            }
+            item.OnLoadAsset(go, transform);
+            item.Awake();
+
+            return item;
+        }
+
+        public void DestroyItem()
+        {
+            foreach (var item in itemList)
+            {
+                item.Destroy();
+            }
+            itemList.Clear();
+        }
+
+        private void DisableItem()
+        {
+            foreach (var item in itemList)
+            {
+                item.Disable();
+            }
+        }
+
+        private void EnableItem()
+        {
+            foreach (var item in itemList)
+            {
+                item.Enable();
+            }
+        }
+
+        public void OpenChild<T>(Action callback = null, params object[] args)
+        {
+            var viewType = typeof(T);
             UISubView subVIew = FindChild(viewType);
             if (subVIew == null)
             {
@@ -75,12 +124,13 @@ namespace HaloFrame
         /// </summary>
         /// <param name="viewType"></param>
         /// <param name="args"></param>
-        public void OpenOneChildUi(ViewType viewType, params object[] args)
+        public void OpenOneChildUI<T>(params object[] args)
         {
+            var viewType = typeof(T);
             OpenOneChildUiAsync(viewType, args);
         }
 
-        private async void OpenOneChildUiAsync(ViewType viewType, object[] args)
+        private async void OpenOneChildUiAsync(Type viewType, object[] args)
         {
             UISubView subView = FindChild(viewType);
             if (subView == null)
@@ -97,9 +147,11 @@ namespace HaloFrame
             for (int i = showList.Count - 1; i >= 0; i--)
             {
                 var child = showList[i];
-                if (child.UIConfig.ViewType != viewType)
+                var childType = child.GetType();
+                if (childType != viewType)
                 {
-                    CloseChild(child.UIConfig.ViewType);
+                    // todo 测试
+                    CloseChild(childType);
                 }
                 else
                 {
@@ -139,7 +191,7 @@ namespace HaloFrame
             callback?.Invoke();
         }
 
-        public void CloseChild(ViewType viewType, Action callback = null)
+        public void CloseChild(Type viewType, Action callback = null)
         {
             if (!IsActive(viewType))
                 return;
@@ -150,7 +202,7 @@ namespace HaloFrame
             CloseAsync(viewType, callback);
         }
 
-        private async void CloseAsync(ViewType viewType, Action callback)
+        private async void CloseAsync(Type viewType, Action callback)
         {
             await WaitChildAnimation();
 
@@ -162,7 +214,7 @@ namespace HaloFrame
             for (int i = showList.Count - 1; i >= 0; i--)
             {
                 var tempUI = showList[i];
-                if (tempUI.UIConfig.ViewType == viewType)
+                if (tempUI.GetType() == viewType)
                 {
                     showList.RemoveAt(i);
                     break;
@@ -171,12 +223,13 @@ namespace HaloFrame
             callback?.Invoke();
         }
 
-        public void RemoveChild(ViewType viewType)
+        public void RemoveChild<T>()
         {
+            var viewType = typeof(T);
             for (int i = showList.Count - 1; i >= 0; i--)
             {
                 var tempUI = showList[i];
-                if (tempUI.UIConfig.ViewType == viewType)
+                if (tempUI.GetType() == viewType)
                 {
                     showList.RemoveAt(i);
                     break;
@@ -229,7 +282,7 @@ namespace HaloFrame
             childDict.Clear();
         }
 
-        public void AddChild(ViewType viewType, UISubView subView)
+        public void AddChild(Type viewType, UISubView subView)
         {
             if (subView == null)
                 return;
@@ -243,12 +296,12 @@ namespace HaloFrame
             subView.Parent = this;
         }
 
-        private bool IsActive(ViewType viewType)
+        private bool IsActive(Type viewType)
         {
             for (int i = 0; i < showList.Count; i++)
             {
                 var tempUI = showList[i];
-                if (tempUI.UIConfig.ViewType == viewType)
+                if (tempUI.GetType() == viewType)
                 {
                     return true;
                 }
@@ -256,10 +309,18 @@ namespace HaloFrame
             return false;
         }
 
-        public UISubView FindChild(ViewType viewType)
+        public UISubView FindChild(Type viewType)
         {
             childDict.TryGetValue(viewType, out var childUI);
             return childUI;
+        }
+
+        internal UIView FindChild(string name)
+        {
+            var type = AssemblyTools.GetType(name);
+            if (type == null)
+                return null;
+            return FindChild(type);
         }
 
         private async Task WaitChildAnimation()

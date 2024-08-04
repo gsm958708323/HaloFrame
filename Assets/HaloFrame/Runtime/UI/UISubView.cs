@@ -17,11 +17,11 @@ namespace HaloFrame
         {
             if (Parent != null)
             {
-                Parent.CloseChild(UIConfig.ViewType);
+                Parent.CloseChild(GetType());
             }
             else
             {
-                GameManager.UI.Close(UIConfig.ViewType);
+                GameManager.UI.Close(GetType());
             }
         }
     }

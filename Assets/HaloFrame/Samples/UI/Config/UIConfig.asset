@@ -9,56 +9,377 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46d3f343a2f1c7943992c9376fd85058, type: 3}
+  m_Script: {fileID: 11500000, guid: b7dd514495d042741ba7914679181dee, type: 3}
   m_Name: UIConfig
   m_EditorClassIdentifier: 
-  uiConfigs:
-  - ViewType: 1
-    LayerType: 3000
-    ResType: 0
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab
-    ChildList: 0600000007000000
-    LoadWithParent: 0
-  - ViewType: 2
-    LayerType: 3000
-    ResType: 0
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab
-    ChildList: 
-    LoadWithParent: 0
-  - ViewType: 4
-    LayerType: 3000
-    ResType: 0
-    IsPopup: 1
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab
-    ChildList: 
-    LoadWithParent: 0
-  - ViewType: 5
-    LayerType: 5000
-    ResType: 0
-    IsPopup: 1
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab
-    ChildList: 
-    LoadWithParent: 0
-  - ViewType: 6
-    LayerType: 3000
-    ResType: 0
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab
-    ChildList: 
-    LoadWithParent: 0
-  - ViewType: 7
-    LayerType: 3000
-    ResType: 0
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab
-    ChildList: 
-    LoadWithParent: 0
-  - ViewType: 3
-    LayerType: 5000
-    ResType: 0
-    IsPopup: 0
-    Prefab: Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab
-    ChildList: 
-    LoadWithParent: 0
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects: []
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: uiConfigs
+      Entry: 7
+      Data: 0|System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[HaloFrame.UIConfig,
+        Assembly-CSharp]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 1|System.Collections.Generic.GenericEqualityComparer`1[[System.String,
+        mscorlib]], mscorlib
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 7
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: FullView1
+    - Name: $v
+      Entry: 7
+      Data: 2|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 1
+    - Name: LayerType
+      Entry: 3
+      Data: 3000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1003
+    - Name: IsPopup
+      Entry: 5
+      Data: false
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 3|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 2
+    - Name: 
+      Entry: 1
+      Data: ChildView1
+    - Name: 
+      Entry: 1
+      Data: ChildView2
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: FullView2
+    - Name: $v
+      Entry: 7
+      Data: 4|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 2
+    - Name: LayerType
+      Entry: 3
+      Data: 3000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1004
+    - Name: IsPopup
+      Entry: 5
+      Data: false
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 5|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: TipsView1
+    - Name: $v
+      Entry: 7
+      Data: 6|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 4
+    - Name: LayerType
+      Entry: 3
+      Data: 3000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1006
+    - Name: IsPopup
+      Entry: 5
+      Data: true
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 7|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: TipsView2
+    - Name: $v
+      Entry: 7
+      Data: 8|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 5
+    - Name: LayerType
+      Entry: 3
+      Data: 5000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1007
+    - Name: IsPopup
+      Entry: 5
+      Data: true
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 9|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: ChildView1
+    - Name: $v
+      Entry: 7
+      Data: 10|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 6
+    - Name: LayerType
+      Entry: 3
+      Data: 3000
+    - Name: ResType
+      Entry: 3
+      Data: 1
+    - Name: ResId
+      Entry: 3
+      Data: 1001
+    - Name: IsPopup
+      Entry: 5
+      Data: false
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 11|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: ChildView2
+    - Name: $v
+      Entry: 7
+      Data: 12|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 7
+    - Name: LayerType
+      Entry: 3
+      Data: 3000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1002
+    - Name: IsPopup
+      Entry: 5
+      Data: false
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 13|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 1
+      Data: FullView2_Top
+    - Name: $v
+      Entry: 7
+      Data: 14|HaloFrame.UIConfig, Assembly-CSharp
+    - Name: ViewType
+      Entry: 3
+      Data: 3
+    - Name: LayerType
+      Entry: 3
+      Data: 5000
+    - Name: ResType
+      Entry: 3
+      Data: 0
+    - Name: ResId
+      Entry: 3
+      Data: 1005
+    - Name: IsPopup
+      Entry: 5
+      Data: false
+    - Name: Prefab
+      Entry: 1
+      Data: Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab
+    - Name: ChildList
+      Entry: 7
+      Data: 15|System.Collections.Generic.List`1[[System.String, mscorlib]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: LoadWithParent
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 

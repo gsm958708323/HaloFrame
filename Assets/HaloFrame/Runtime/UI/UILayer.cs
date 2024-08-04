@@ -28,7 +28,7 @@ namespace HaloFrame
             baseOrder = canvas.sortingOrder;
         }
 
-        internal void Open(ViewType type, Action action, object[] args)
+        internal void Open(Type type, Action action, object[] args)
         {
             UIView view = GameManager.UI.CreateUI(type, this);
             if (view == null)
