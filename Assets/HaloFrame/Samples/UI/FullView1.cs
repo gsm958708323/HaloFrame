@@ -6,34 +6,44 @@ using UnityEngine.UI;
 
 public class FullView1 : UIGameView
 {
+    private List<ButtonItem> btnList;
+    private Transform layout;
     protected override void OnAwake()
     {
         base.OnAwake();
+
+        btnList = new();
 
         transform.Find("Button").GetComponent<Button>().onClick.AddListener(() =>
         {
             CloseSelf();
         });
 
-        transform.Find("ChildBtn1").GetComponent<Button>().onClick.AddListener(() =>
-        {
-            OpenOneChildUI<ChildView1>(ResType.Static);
-        });
+        layout = transform.Find("Layout");
+    }
 
-        transform.Find("ChildBtn2").GetComponent<Button>().onClick.AddListener(() =>
-        {
-            OpenOneChildUI<ChildView2>();
-        });
+    protected override void OnDestroy()
+    {
+        btnList = null;
+
+        base.OnDestroy();
     }
 
     protected override void OnStart(object[] args)
     {
         base.OnStart(args);
 
-        var item2 = CreateItem<ButtonItem>();
-        item2.Start(new object[] { 2 });
+        for (int i = 0; i < 4; i++)
+        {
+            var item = CreateItem<ButtonItem>();
+            item.transform.SetParent(layout);
+            btnList.Add(item);
+        }
 
-        var item = CreateItem<ButtonItem>(2001);
-        item.Start(new object[] { 1 });
+        foreach (var item in btnList)
+        {
+            var index = btnList.IndexOf(item);
+            item.Start(new object[] { index });
+        }
     }
 }

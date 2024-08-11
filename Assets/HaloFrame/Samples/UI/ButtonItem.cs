@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using HaloFrame;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class ButtonItem : UIItem
@@ -13,14 +10,24 @@ public class ButtonItem : UIItem
         int type = (int)args[0];
         gameObject.GetComponentInChildren<Button>().onClick.AddListener(() =>
         {
-            if (type == 1)
+            if (type == 0)
             {
-                Debug.Log("这是动态创建的item");
+                Parent.OpenOneChildUI<ChildView1>();
             }
-            else
+            else if (type == 1)
             {
-                Debug.Log("这是静态创建的item");
+                Parent.OpenOneChildUI<ChildView2>();
+            }
+            else if (type == 2)
+            {
+                Parent.OpenOneChildUI<ChildView3>();
+            }
+            else if (type == 3)
+            {
+                Parent.OpenOneChildUI<ChildView4>();
             }
         });
+
+        gameObject.GetComponentInChildren<Text>().text =  $"子界面{type + 1}";
     }
 }

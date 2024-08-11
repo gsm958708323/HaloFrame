@@ -60,7 +60,7 @@ namespace HaloFrame
             GameManager.UI.Close(GetType());
         }
 
-        public UIItem CreateItem<T>(int resId = 0)
+        public T CreateItem<T>(int resId = 0)
                     where T : UIItem, new()
         {
             // 创建实例
@@ -81,7 +81,8 @@ namespace HaloFrame
             }
             else
             {
-                go = gameObject.FindEx(item.ToString());
+                GameObject prefab = gameObject.FindEx(item.ToString());
+                go = GameObject.Instantiate(prefab);
             }
             if (go == null)
             {
@@ -91,7 +92,7 @@ namespace HaloFrame
             item.OnLoadAsset(go, transform);
             item.Awake();
 
-            return item;
+            return item as T;
         }
 
         public void DestroyItem()

@@ -59,6 +59,10 @@ namespace HaloFrame
                 canvas.interactable = active;
                 canvas.blocksRaycasts = active;
             }
+            else
+            {
+                gameObject.SetActive(active);
+            }
         }
 
         public static void SetActiveScale(this GameObject gameObject, bool active)
