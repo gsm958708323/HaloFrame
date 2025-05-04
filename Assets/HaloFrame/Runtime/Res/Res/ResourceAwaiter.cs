@@ -4,26 +4,38 @@ namespace HaloFrame
 {
     public class ResourceAwaiter : IAwaiter<IResource>, IAwaitable<ResourceAwaiter, IResource>
     {
-        public bool IsCompleted => throw new NotImplementedException();
+        public bool IsCompleted { get; private set; }
+        public IResource result { get; private set; }
+        private Action finishCB;
 
         public ResourceAwaiter GetAwaiter()
         {
-            throw new NotImplementedException();
+            return this;
         }
 
         public IResource GetResult()
         {
-            throw new NotImplementedException();
+            return result;
         }
 
         public void OnCompleted(Action continuation)
         {
-            throw new NotImplementedException();
+            if (IsCompleted)
+            {
+                finishCB?.Invoke();
+            }
+            else
+            {
+                finishCB += continuation;
+            }
         }
 
         internal void SetResult(IResource resource)
         {
-            throw new NotImplementedException();
+            IsCompleted = true;
+            result = resource;
+            finishCB?.Invoke();
+            finishCB = null;
         }
     }
 }

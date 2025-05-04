@@ -49,6 +49,15 @@ namespace HaloFrame
             manifestAB = objests[0] as AssetBundleManifest;
         }
 
+        internal ABundle Load(string url)
+        {
+            return LoadInternal(url, false);
+        }
+        internal ABundle LoadAsync(string url)
+        {
+            return LoadInternal(url, true);
+        }
+
         ABundle LoadInternal(string url, bool async)
         {
             ABundle bundle;

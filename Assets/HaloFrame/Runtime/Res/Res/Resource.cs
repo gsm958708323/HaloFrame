@@ -1,29 +1,100 @@
 using System;
+using System.Diagnostics;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace HaloFrame
 {
     public class Resource : AResource
     {
-        public override bool keepWaiting => throw new NotImplementedException();
-
-        public override T GetAsset<T>()
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Load()
         {
-            throw new NotImplementedException();
-        }
+            if (string.IsNullOrEmpty(url))
+            {
+                Debugger.LogError($"加载的资源url不存在 {url}", LogDomain.Res);
+                return;
+            }
 
-        public override void LoadAsset()
-        {
-            throw new NotImplementedException();
+            if (bundle is not null)
+            {
+                Debugger.LogError($"资源已经加载过了 {url}", LogDomain.Res);
+                return;
+            }
+
+            string bundleUrl = GameManager.Resource.GetAssetBundleUrl(url);
+            if (string.IsNullOrEmpty(bundleUrl))
+            {
+                Debugger.LogError($"资源没有找到对应的bundle路径 {url}", LogDomain.Res);
+                return;
+
+            }
+            bundle = BundleManager.Instance.Load(bundleUrl);
+            LoadAsset();
         }
 
         public override void Unload()
         {
-            throw new NotImplementedException();
+            if (bundle is null)
+            {
+                Debugger.LogError($"卸载的资源不存在 {url}", LogDomain.Res);
+                return;
+            }
+
+            // 先卸载资源
+            if (asset && asset is not GameObject)
+            {
+                Resources.UnloadAsset(asset);
+                asset = null;
+            }
+            // 再卸载bundle
+            BundleManager.Instance.Unload(bundle);
+            bundle = null;
+            awaiter = null;
+            finishCB = null;
+        }
+
+
+        public override void LoadAsset()
+        {
+            if (bundle is null)
+            {
+                Debugger.LogError($"加载资源时bundle不存在 {url}", LogDomain.Res);
+                return;
+            }
+
+            // 异步转同步
+            FreshAsyncAsset();
+
+            asset = bundle.LoadAsset(url, typeof(Object));
+            done = true;
+            finishCB?.Invoke(this);
+            finishCB = null;
+        }
+
+        public override T GetAsset<T>()
+        {
+            Type type = typeof(T);
+            if (type == typeof(Sprite))
+            {
+                if (asset is Sprite)
+                {
+                    return asset as T;
+                }
+                else
+                {
+                    if (asset && asset is not GameObject)
+                    {
+                        Resources.UnloadAsset(asset);
+                    }
+
+                    asset = bundle.LoadAsset(url, type);
+                    return asset as T;
+                }
+            }
+            else
+            {
+                return asset as T;
+            }
         }
     }
 }

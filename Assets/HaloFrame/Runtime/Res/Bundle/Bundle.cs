@@ -46,7 +46,7 @@ namespace HaloFrame
                 Debugger.LogError($"资源名字不存在 {url}", LogDomain.Res);
                 return null;
             }
-            if (assetBundle == null)
+            if (assetBundle is null)
             {
                 Debugger.LogError($"ab资源不存在 {url} {assetName}", LogDomain.Res);
                 return null;
@@ -62,7 +62,7 @@ namespace HaloFrame
                 Debugger.LogError($"资源名字不存在 {url}", LogDomain.Res);
                 return null;
             }
-            if (assetBundle == null)
+            if (assetBundle is null)
             {
                 Debugger.LogError($"ab资源不存在 {url} {assetName}", LogDomain.Res);
                 return null;

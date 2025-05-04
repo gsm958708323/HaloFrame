@@ -12,7 +12,10 @@ namespace HaloFrame
     public class ResourceManager : IManager
     {
         private bool isEditor;
-        Dictionary<string, string> bundleDict;
+        /// <summary>
+        /// 资源对应bundle路径
+        /// </summary>
+        Dictionary<string, string> assetBundleDict;
         Dictionary<string, List<string>> dependencyDict;
         Dictionary<string, AResource> resourceDict;
         Dictionary<ushort, string> assetUrlDict;
@@ -203,7 +206,7 @@ namespace HaloFrame
         /// <param name="bundleBytes"></param>
         private void ReadBundle(byte[] bundleBytes)
         {
-            bundleDict = new();
+            assetBundleDict = new();
             var stream = new MemoryStream(bundleBytes);
             var reader = new BinaryReader(stream);
             // bundle数量
@@ -217,9 +220,15 @@ namespace HaloFrame
                 {
                     var assetId = reader.ReadUInt16();
                     var assetUrl = assetUrlDict[assetId];
-                    bundleDict.Add(assetUrl, bundleUrl);
+                    assetBundleDict.Add(assetUrl, bundleUrl);
                 }
             }
+        }
+
+        public string GetAssetBundleUrl(string assetUrl)
+        {
+            assetBundleDict.TryGetValue(assetUrl, out string bundleUrl);
+            return bundleUrl;
         }
 
         /// <summary>

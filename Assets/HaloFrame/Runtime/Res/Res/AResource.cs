@@ -16,6 +16,7 @@ namespace HaloFrame
         internal bool done { get; set; }
         internal ResourceAwaiter awaiter { get; set; }
         internal Action<AResource> finishCB { get; set; }
+        public override bool keepWaiting => !done;
 
         /// <summary>
         /// 增加引用
