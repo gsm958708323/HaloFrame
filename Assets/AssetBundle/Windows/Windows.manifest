@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 3103455759
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: assets/res/ui/fullview.prefab.ab
+      Dependencies: {}

@@ -2,13 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace HaloFrame
 {
-    // 临时
     public class ResourceManager : IManager
     {
         private bool isEditor;
@@ -248,9 +246,13 @@ namespace HaloFrame
             }
         }
 
+        // todo 临时代码
         public T LoadAsset<T>(string assetPath) where T : UnityEngine.Object
         {
-            return AssetDatabase.LoadAssetAtPath<T>(assetPath);
+#if UNITY_EDITOR
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
+#endif
+            return null;
         }
 
         public T LoadAsset<T>(int resId) where T : UnityEngine.Object
