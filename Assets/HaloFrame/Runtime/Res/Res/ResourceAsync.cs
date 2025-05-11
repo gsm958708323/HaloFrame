@@ -1,12 +1,32 @@
 using System;
-using System.Diagnostics;
+using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace HaloFrame
 {
-    public class Resource : AResource
+    public class ResourceAsync : AResourceAsync
     {
+        private AssetBundleRequest assetBundleRequest;
+        internal override Object asset
+        {
+            get
+            {
+                if (done)
+                    return base.asset;
+
+                FreshAsyncAsset();
+                return base.asset;
+            }
+            set
+            {
+                base.asset = value;
+            }
+        }
+
+        /// <summary>
+        /// 加载AB
+        /// </summary>
         public override void Load()
         {
             if (string.IsNullOrEmpty(url))
@@ -27,9 +47,7 @@ namespace HaloFrame
                 Debugger.LogError($"资源没有找到对应的bundle路径 {url}", LogDomain.Res);
                 return;
             }
-            
-            bundle = BundleManager.Instance.Load(bundleUrl);
-            LoadAsset();
+            bundle = BundleManager.Instance.LoadAsync(bundleUrl);
         }
 
         public override void Unload()
@@ -46,6 +64,8 @@ namespace HaloFrame
                 Resources.UnloadAsset(asset);
                 asset = null;
             }
+
+            assetBundleRequest = null;
             // 再卸载bundle
             BundleManager.Instance.Unload(bundle);
             bundle = null;
@@ -53,7 +73,9 @@ namespace HaloFrame
             finishCB = null;
         }
 
-
+        /// <summary>
+        /// 加载资源
+        /// </summary>
         public override void LoadAsset()
         {
             if (bundle is null)
@@ -62,13 +84,33 @@ namespace HaloFrame
                 return;
             }
 
-            // 异步转同步
-            FreshAsyncAsset();
+            if (!bundle.isScene)
+            {
+                if (assetBundleRequest is not null)
+                {
+                    // 在isDone为true之前访问，将导致加载过程停止
+                    asset = assetBundleRequest.asset;
+                }
+                else
+                {
+                    asset = bundle.LoadAsset(url, typeof(Object));
+                }
+            }
 
-            asset = bundle.LoadAsset(url, typeof(Object));
             done = true;
             finishCB?.Invoke(this);
             finishCB = null;
+        }
+
+        public override void LoadAssetAsync()
+        {
+            if (bundle is null)
+            {
+                Debugger.LogError($"加载资源时bundle不存在 {url}", LogDomain.Res);
+                return;
+            }
+
+            assetBundleRequest = bundle.LoadAssetAsync(url, typeof(Object));
         }
 
         public override T GetAsset<T>()
@@ -95,6 +137,38 @@ namespace HaloFrame
             {
                 return asset as T;
             }
+        }
+
+        public override bool Tick()
+        {
+            // 检查自己加载进度
+            if (done)
+                return true;
+
+            // 检查依赖加载进度
+            if (dependencies != null)
+            {
+                foreach (var item in dependencies)
+                {
+                    if (!item.done)
+                        return false;
+                }
+            }
+
+            // 加载bundle加载进度
+            if (!bundle.done)
+                return false;
+
+            if (assetBundleRequest is null)
+            {
+                LoadAssetAsync();
+            }
+            // 检查资源加载进度
+            if (assetBundleRequest is not null && !assetBundleRequest.isDone)
+                return false;
+
+            LoadAsset();
+            return true;
         }
     }
 }

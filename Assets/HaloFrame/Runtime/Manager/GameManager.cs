@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using HaloFrame;
+using System.IO;
 
 public class GameManager : GameManagerBase
 {
@@ -17,9 +18,40 @@ public class GameManager : GameManagerBase
 
         Dispatcher = GetManager<Dispatcher>();
         Resource = GetManager<ResourceManager>();
+        InitResource();
         Driver = GetManager<DriverManager>();
         RedDot = GetManager<RedDotManager>();
         UI = GetManager<UIManager>();
+    }
+
+    private string prefixPath;
+    void InitResource()
+    {
+        string platform = GetPlatform();
+        prefixPath = Path.GetFullPath(Path.Combine(Application.dataPath, "AssetBundle")).Replace("\\", "/");
+        prefixPath += "/" + platform;
+        Resource.Init(platform, GetFileUrl);
+    }
+
+    private string GetFileUrl(string url)
+    {
+        return $"{prefixPath}/{url}";
+    }
+    private string GetPlatform()
+    {
+        switch (Application.platform)
+        {
+            case RuntimePlatform.WindowsEditor:
+            case RuntimePlatform.WindowsPlayer:
+                return "Windows";
+            case RuntimePlatform.Android:
+                return "Android";
+            case RuntimePlatform.IPhonePlayer:
+                return "iOS";
+            default:
+                Debugger.LogError($"未支持的平台:{Application.platform}", LogDomain.Res);
+                return "";
+        }
     }
 
     /*

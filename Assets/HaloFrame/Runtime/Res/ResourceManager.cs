@@ -15,8 +15,8 @@ namespace HaloFrame
         /// </summary>
         Dictionary<string, string> assetBundleDict;
         Dictionary<string, List<string>> dependencyDict;
-        Dictionary<string, AResource> resourceDict;
         Dictionary<ushort, string> assetUrlDict;
+        Dictionary<string, AResource> resourceDict;
         List<AResourceAsync> asyncList;
         LinkedList<AResource> waitUnloadList;
 
@@ -27,6 +27,9 @@ namespace HaloFrame
 
         public void Init(string platform, Func<string, string> getFileCB, bool isEditor = false, ulong offset = 0)
         {
+            resourceDict = new();
+            asyncList = new();
+            waitUnloadList = new();
             this.isEditor = isEditor;
             if (isEditor)
                 return;
@@ -118,6 +121,12 @@ namespace HaloFrame
             if (isEditor)
             {
                 resource = new EditorResource();
+            }
+            else if (async)
+            {
+                var resourceAsync = new ResourceAsync();
+                asyncList.Add(resourceAsync);
+                resource = resourceAsync;
             }
             else
             {
@@ -264,6 +273,19 @@ namespace HaloFrame
         public void UnloadAsset(GameObject asset)
         {
             Object.Destroy(asset);
+        }
+
+        internal void LoadWithCallback(string url, bool async, Action<IResource> callback)
+        {
+            var resource = LoadInternal(url, async);
+            if (resource.done)
+            {
+                callback?.Invoke(resource);
+            }
+            else
+            {
+                resource.finishCB += callback;
+            }
         }
     }
 }
