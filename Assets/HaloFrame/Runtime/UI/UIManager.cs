@@ -150,10 +150,10 @@ namespace HaloFrame
                 view.UIState = UIState.Loading;
                 LoadAsset(view);
             }
-            return view.LoadTask.Task;
+            return view.LoadTask.Task; 
         }
 
-        private void LoadAsset(UIView view)
+        private async void LoadAsset(UIView view)
         {
             if (view is UISubView subView)
             {
@@ -162,8 +162,9 @@ namespace HaloFrame
                 Transform parent;
                 if (subView.ResType == ResType.Dynamic)
                 {
-                    GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(subView.UIConfig.ResId);
-                    childGo = GameObject.Instantiate(prefab);
+                    var awaiter = GameManager.Resource.LoadWithAwaiter(subView.UIConfig.ResId);
+                    await awaiter;
+                    childGo = awaiter.GetResult().Instantiate(true);
                     parent = subView.UILayer.Canvas.transform;
                 }
                 else
@@ -191,8 +192,9 @@ namespace HaloFrame
                     Debugger.LogError($"界面的ResId为0 {gameView}", LogDomain.UI);
                     return;
                 }
-                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(view.UIConfig.ResId);
-                var go = GameObject.Instantiate(prefab);
+                var awaiter = GameManager.Resource.LoadWithAwaiter(view.UIConfig.ResId);
+                await awaiter;
+                var go = awaiter.GetResult().Instantiate(true);
                 var parent = view.UILayer.Canvas.transform;
                 view.OnLoadAsset(go, parent);
             }
@@ -213,7 +215,7 @@ namespace HaloFrame
 
             if (view.gameObject != null)
             {
-                GameManager.Resource.UnloadAsset(view.gameObject);
+                GameObject.Destroy(view.gameObject);
             }
         }
     }

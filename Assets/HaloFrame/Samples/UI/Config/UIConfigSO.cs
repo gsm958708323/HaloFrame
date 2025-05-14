@@ -14,7 +14,8 @@ public class UIConfigSO : SerializedScriptableObject
     public static void Init()
     {
         var path = "Assets/HaloFrame/Samples/UI/Config/UIConfig.asset";
-        var so = GameManager.Resource.LoadAsset<UIConfigSO>(path);
+        var resource = GameManager.Resource.Load(path);
+        var so = resource.GetAsset<UIConfigSO>();
         if (so == null)
             return;
 

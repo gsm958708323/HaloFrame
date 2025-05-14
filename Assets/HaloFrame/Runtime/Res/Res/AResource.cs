@@ -83,7 +83,7 @@ namespace HaloFrame
             var go = Instantiate();
             if (autoUnload && go)
             {
-                var comp = go.GetComponent<AutoUnload>();
+                var comp = go.AddComponent<AutoUnload>();
                 comp.resource = this;
             }
             return go;

@@ -76,8 +76,8 @@ namespace HaloFrame
             GameObject go;
             if (resId != 0)
             {
-                GameObject prefab = GameManager.Resource.LoadAsset<GameObject>(resId);
-                go = GameObject.Instantiate(prefab);
+                var resource = GameManager.Resource.Load(resId, false);
+                go = resource.Instantiate(true);
             }
             else
             {

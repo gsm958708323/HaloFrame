@@ -13,7 +13,8 @@ public class ResConfigSO : ScriptableObject
     public static void Init()
     {
         var path = "Assets/HaloFrame/Samples/UI/Config/ResConfig.asset";
-        var so = GameManager.Resource.LoadAsset<ResConfigSO>(path);
+        var resource = GameManager.Resource.Load(path);
+        var so = resource.GetAsset<ResConfigSO>();
         if (so == null)
             return;
 

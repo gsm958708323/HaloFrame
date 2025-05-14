@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1659254906
+CRC: 1032340119
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 0cc6def02121be6ed18eaddd21b4413f
+    Hash: 46c136628e3355529642fa8f9a1bb526
   TypeTreeHash:
     serializedVersion: 2
     Hash: 0dab433503b1561540e9849c66d3c6bb
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 0cc6def02121be6ed18eaddd21b4413f
+    Hash: 46c136628e3355529642fa8f9a1bb526
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -60,5 +60,5 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: UnityEngine.UI
   ClassName: UnityEngine.UI.SpriteState
 Assets:
-- Assets/Res/UI/FullView.prefab
+- Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab
 Dependencies: []

@@ -1,7 +1,40 @@
 ManifestFileVersion: 0
-CRC: 3103455759
+CRC: 186827565
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
-      Name: assets/res/ui/fullview.prefab.ab
+      Name: assets/haloframe/samples/ui/prefabs/buttonitem.prefab.ab
+      Dependencies: {}
+    Info_1:
+      Name: assets/haloframe/samples/ui/prefabs/childview1.prefab.ab
+      Dependencies: {}
+    Info_2:
+      Name: assets/haloframe/samples/ui/prefabs/childview2.prefab.ab
+      Dependencies: {}
+    Info_3:
+      Name: assets/haloframe/samples/ui/prefabs/childview3.prefab.ab
+      Dependencies: {}
+    Info_4:
+      Name: assets/haloframe/samples/ui/prefabs/childview4.prefab.ab
+      Dependencies: {}
+    Info_5:
+      Name: assets/haloframe/samples/ui/prefabs/fullview1.prefab.ab
+      Dependencies: {}
+    Info_6:
+      Name: assets/haloframe/samples/ui/prefabs/fullview2.prefab.ab
+      Dependencies: {}
+    Info_7:
+      Name: assets/haloframe/samples/ui/prefabs/fullview2_top.prefab.ab
+      Dependencies: {}
+    Info_8:
+      Name: assets/haloframe/samples/ui/prefabs/tipsview1.prefab.ab
+      Dependencies: {}
+    Info_9:
+      Name: assets/haloframe/samples/ui/prefabs/tipsview2.prefab.ab
+      Dependencies: {}
+    Info_10:
+      Name: assets/haloframe/samples/ui/config/resconfig.asset.ab
+      Dependencies: {}
+    Info_11:
+      Name: assets/haloframe/samples/ui/config/uiconfig.asset.ab
       Dependencies: {}

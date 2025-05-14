@@ -100,7 +100,52 @@ namespace HaloFrame
             }
         }
 
-        public IResource Load(string url, bool async)
+        internal void LoadWithCallback(string url, bool async, Action<IResource> callback)
+        {
+            var resource = LoadInternal(url, async);
+            if (resource.done)
+            {
+                callback?.Invoke(resource);
+            }
+            else
+            {
+                resource.finishCB += callback;
+            }
+        }
+
+        internal ResourceAwaiter LoadWithAwaiter(int resId)
+        {
+            var config = ResConfigSO.Get(resId);
+            return LoadWithAwaiter(config.ResPath);
+        }
+
+        internal ResourceAwaiter LoadWithAwaiter(string url)
+        {
+            AResource resource = LoadInternal(url, true);
+            if (resource.done)
+            {
+                if (resource.awaiter is null)
+                {
+                    resource.awaiter = new ResourceAwaiter();
+                    resource.awaiter.SetResult(resource);
+                }
+
+                return resource.awaiter;
+            }
+            if (resource.awaiter is null)
+            {
+                resource.awaiter = new ResourceAwaiter();
+            }
+            return resource.awaiter;
+        }
+
+        public IResource Load(int resId, bool async)
+        {
+            var config = ResConfigSO.Get(resId);
+            return Load(config.ResPath, async);
+        }
+
+        public IResource Load(string url, bool async = true)
         {
             return LoadInternal(url, async);
         }
@@ -252,39 +297,6 @@ namespace HaloFrame
             {
                 var assetUrl = reader.ReadString();
                 assetUrlDict.Add(i, assetUrl);
-            }
-        }
-
-        // todo 临时代码
-        public T LoadAsset<T>(string assetPath) where T : UnityEngine.Object
-        {
-#if UNITY_EDITOR
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
-#endif
-            return null;
-        }
-
-        public T LoadAsset<T>(int resId) where T : UnityEngine.Object
-        {
-            var config = ResConfigSO.Get(resId);
-            return LoadAsset<T>(config.ResPath);
-        }
-
-        public void UnloadAsset(GameObject asset)
-        {
-            Object.Destroy(asset);
-        }
-
-        internal void LoadWithCallback(string url, bool async, Action<IResource> callback)
-        {
-            var resource = LoadInternal(url, async);
-            if (resource.done)
-            {
-                callback?.Invoke(resource);
-            }
-            else
-            {
-                resource.finishCB += callback;
             }
         }
     }

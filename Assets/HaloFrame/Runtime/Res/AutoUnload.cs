@@ -9,8 +9,8 @@ namespace HaloFrame
 
         void OnDestroy()
         {
-            if(resource is null)
-            return;
+            if (resource is null)
+                return;
 
             GameManager.Resource.Unload(resource);
             resource = null;
