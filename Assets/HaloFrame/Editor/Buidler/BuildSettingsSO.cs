@@ -1,39 +1,83 @@
-﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Xml.Serialization;
-using UnityEditor;
 using UnityEngine;
+using Sirenix.OdinInspector;
+using System.IO;
+using System.Diagnostics;
+using System;
+using UnityEditor;
+using System.Drawing.Printing;
 
 namespace HaloFrame
 {
-    public class BuildSetting : ISupportInitialize
+    [CreateAssetMenu(fileName = "BuildSettings", menuName = "HaloFrame/Build Settings", order = 1)]
+    public class BuildSettingsSO : SerializedScriptableObject
     {
-        [DisplayName("项目名称")]
-        [XmlAttribute("ProjectName")]
-        public string projectName { get; set; }
+        [BoxGroup("基本设置")]
+        [LabelText("项目名称")]
+        public string projectName = "HaloFrame";
 
-        [DisplayName("后缀列表")]
-        [XmlAttribute("SuffixList")]
-        public List<string> suffixList { get; set; } = new List<string>();
+        [BoxGroup("基本设置")]
+        [LabelText("版本号")]
+        public string version = "1.0.0";
 
-        [DisplayName("打包文件的目标文件夹")]
-        [XmlAttribute("BuildRoot")]
-        public string buildRoot { get; set; }
+        [BoxGroup("基本设置")]
+        [FolderPath]
+        [LabelText("打包文件的目标文件夹")]
+        public string buildRoot = "Assets/AssetBundle";
 
-        [DisplayName("打包选项")]
-        [XmlElement("BuildItem")]
-        public List<BuildItem> items { get; set; } = new List<BuildItem>();
 
-        [XmlIgnore]
-        public Dictionary<string, BuildItem> itemDic = new Dictionary<string, BuildItem>();
+        [BoxGroup("热更新设置", ShowLabel = true)]
+        [LabelText("热更新地址")]
+        public string remoteAddress = "http://127.0.0.1:8080";
 
-        public void BeginInit()
+        [HorizontalGroup("热更新设置/选项")]
+        [VerticalGroup("热更新设置/选项/左")]
+        [LabelText("启用热更新")]
+        public bool openHotUpdate = true;
+
+        [VerticalGroup("热更新设置/选项/右")]
+        [LabelText("启用分包")]
+        public bool enablePackage = false;
+
+        [BoxGroup("打包配置", ShowLabel = true)]
+        [ListDrawerSettings(ShowFoldout = true, ShowItemCount = true, DraggableItems = true)]
+        [LabelText("打包规则")]
+        public List<BuildItem> items = new List<BuildItem>();
+
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第一行")]
+        [Button("根据当前平台打包游戏")]
+        public void Build()
+        {
+            Builder.Build();
+        }
+
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第一行")]
+        [Button("构建热更包")]
+        public void BuildHot()
         {
         }
 
-        public void EndInit()
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第二行")]
+        [Button("打开输出目录")]
+        public void OpenOutPath()
+        {
+            // Process.Start(Path.GetFullPath(_buildPath));
+        }
+
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第二行")]
+        [Button("打开沙盒目录")]
+        public void OpenPersistentPath()
+        {
+            // Process.Start(Path.GetFullPath(_buildPath));
+        }
+
+        [HideInInspector]
+        public Dictionary<string, BuildItem> itemDic = new();
+        public void Init()
         {
             buildRoot = Path.GetFullPath(buildRoot).Replace("\\", "/");
 
@@ -43,7 +87,7 @@ namespace HaloFrame
             {
                 BuildItem buildItem = items[i];
 
-                if (buildItem.bundleType == EBundleType.All || buildItem.bundleType == EBundleType.Directory)
+                if (buildItem.bundleType == EBundleType.Rule || buildItem.bundleType == EBundleType.Directory)
                 {
                     if (!Directory.Exists(buildItem.assetPath))
                     {
@@ -69,17 +113,17 @@ namespace HaloFrame
         }
 
         /// <summary>
-        /// 获取所有在打包设置的文件列表
+        /// 根据规则自动搜集所有文件
         /// </summary>
-        /// <returns>文件列表</returns>
-        public HashSet<string> Collect()
+        /// <returns></returns>
+        internal HashSet<string> Collect()
         {
             float min = Builder.collectRuleFileProgress.x;
             float max = Builder.collectRuleFileProgress.y;
 
             EditorUtility.DisplayProgressBar($"{nameof(Collect)}", "搜集打包规则资源", min);
 
-            //处理每个规则忽略的目录,如路径A/B/C,需要忽略A/B
+            //规则1 Assets/Resources，规则2 Assets/Resources/UI，规则2是规则1的子目录，规则1在搜集文件时会忽略规则2，防止资源重复打包
             for (int i = 0; i < items.Count; i++)
             {
                 BuildItem buildItem_i = items[i];
@@ -93,6 +137,7 @@ namespace HaloFrame
                     BuildItem buildItem_j = items[j];
                     if (i != j && buildItem_j.resourceType == EResourceType.Direct)
                     {
+                        // 如果j是i的子目录，则i把j添加到忽略列表中
                         if (buildItem_j.assetPath.StartsWith(buildItem_i.assetPath, StringComparison.InvariantCulture))
                         {
                             buildItem_i.ignorePaths.Add(buildItem_j.assetPath);
@@ -151,6 +196,7 @@ namespace HaloFrame
             return false;
         }
 
+
         /// <summary>
         /// 通过资源获取打包选项
         /// </summary>
@@ -186,15 +232,13 @@ namespace HaloFrame
         {
             BuildItem buildItem = GetBuildItem(assetUrl);
 
-            if (buildItem == null)
+            if (buildItem is null)
             {
                 return null;
             }
 
-            string name;
-
             //依赖类型一定要匹配后缀
-            if (buildItem.resourceType == EResourceType.Dependency)
+            if (resourceType == EResourceType.Dependency)
             {
                 string extension = Path.GetExtension(assetUrl).ToLower();
                 bool exist = false;
@@ -212,9 +256,10 @@ namespace HaloFrame
                 }
             }
 
+            string name;
             switch (buildItem.bundleType)
             {
-                case EBundleType.All:
+                case EBundleType.Rule:
                     name = buildItem.assetPath;
                     if (buildItem.assetPath[buildItem.assetPath.Length - 1] == '/')
                         name = buildItem.assetPath.Substring(0, buildItem.assetPath.Length - 1);
@@ -235,127 +280,5 @@ namespace HaloFrame
             return name;
         }
 
-        public static BuildSetting Create(string file)
-        {
-            BuildSetting buildSetting = new BuildSetting();
-            XmlUtility.Save(file, buildSetting);
-            return buildSetting;
-        }
-
-        public void Save()
-        {
-            XmlUtility.Save(Builder.BuildSettingPath, this);
-        }
-
-        /// <summary>
-        /// 删除
-        /// </summary>
-        /// <param name="index"></param>
-        public void RemoveRule(int index)
-        {
-            if (items == null || items.Count <= index)
-                return;
-
-            items.RemoveAt(index);
-
-            Save();
-        }
-
-
-        /// <summary>
-        /// 添加规则
-        /// </summary>
-        /// <param name="path">路径</param>
-        /// <param name="rule">规则</param>
-        /// <param name="suffix">后缀</param>
-        public void AddRule(string path, EBundleType rule, SearchOption searchOption)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                Debug.LogError("添加的规则路径不能为空!!");
-                return;
-            }
-
-            if (!Directory.Exists(path))
-            {
-                Debug.LogError($"不存在路径:{path}!!");
-                return;
-            }
-
-            if (GetBuildItem(path) != null)
-            {
-                Debug.LogError($"该规则已经存在:{path}!!");
-                return;
-            }
-
-            BuildItem ruleEntry = new BuildItem { assetPath = path, bundleType = rule };
-            items.Add(ruleEntry);
-
-            Save();
-        }
-
-        public void AddRule(BuildItem item)
-        {
-            if (string.IsNullOrEmpty(item.assetPath))
-            {
-                Debug.LogError("添加的规则路径不能为空!!");
-                return;
-            }
-
-            if (!Directory.Exists(item.assetPath))
-            {
-                Debug.LogError($"不存在路径:{item.assetPath}!!");
-                return;
-            }
-
-            if (GetBuildItem(item.assetPath) != null)
-            {
-                Debug.LogError($"该规则已经存在:{item.assetPath}!!");
-                return;
-            }
-
-            items.Add(item);
-            Save();
-        }
-
-        public void AddSuffix(string suffix)
-        {
-            if (suffixList.Contains(suffix))
-            {
-                Debug.LogError("重复后缀");
-                return;
-            }
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                BuildItem item = items[i];
-            }
-
-            suffixList.Add(suffix);
-            Save();
-        }
-
-        public void RemoveSuffix(int index)
-        {
-            if (suffixList.Count <= index)
-                return;
-
-            suffixList.RemoveAt(index);
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                BuildItem item = items[i];
-
-                item.suffix = string.Empty;
-
-                for (int idx = 0; idx < suffixList.Count; idx++)
-                {
-                    if (!string.IsNullOrEmpty(item.suffix))
-                        item.suffix = item.suffix + "|" + suffixList[idx];
-                    else
-                        item.suffix = item.suffix + suffixList[idx];
-                }
-            }
-        }
     }
 }

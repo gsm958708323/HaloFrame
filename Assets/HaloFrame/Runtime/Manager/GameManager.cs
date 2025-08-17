@@ -30,7 +30,8 @@ public class GameManager : GameManagerBase
         string platform = GetPlatform();
         prefixPath = Path.GetFullPath(Path.Combine(Application.dataPath, "AssetBundle")).Replace("\\", "/");
         prefixPath += "/" + platform;
-        Resource.Init(platform, GetFileUrl);
+        bool isEditorMode = PlayerPrefs.GetInt("IsEditorMode", 1) == 1;
+        Resource.Init(platform, GetFileUrl, isEditorMode);
     }
 
     private string GetFileUrl(string url)

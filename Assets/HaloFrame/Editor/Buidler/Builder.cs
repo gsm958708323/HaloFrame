@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using System.IO;
 using System.ComponentModel;
 using System;
@@ -21,12 +21,12 @@ namespace HaloFrame
         private static readonly Vector2 ms_BuildManifestProgress = new Vector2(0.9f, 1f);
 
         private static readonly CustomProfiler ms_BuildProfiler = new CustomProfiler(nameof(Builder));
-        private static readonly CustomProfiler ms_LoadBuildSettingProfiler = ms_BuildProfiler.CreateChild(nameof(LoadSetting));
+        private static readonly CustomProfiler ms_LoadBuildSettingProfiler = ms_BuildProfiler.CreateChild(nameof(LoadSettingSO));
         private static readonly CustomProfiler ms_SwitchPlatformProfiler = ms_BuildProfiler.CreateChild(nameof(SwitchPlatform));
         private static readonly CustomProfiler ms_CollectProfiler = ms_BuildProfiler.CreateChild(nameof(Collect));
         private static readonly CustomProfiler ms_CollectBuildSettingFileProfiler = ms_CollectProfiler.CreateChild("CollectBuildSettingFile");
         private static readonly CustomProfiler ms_CollectDependencyProfiler = ms_CollectProfiler.CreateChild(nameof(CollectDependency));
-        private static readonly CustomProfiler ms_CollectBundleProfiler = ms_CollectProfiler.CreateChild(nameof(CollectBundle));
+        private static readonly CustomProfiler ms_CollectBundleProfiler = ms_CollectProfiler.CreateChild(nameof(CollectBundleSO));
         private static readonly CustomProfiler ms_GenerateManifestProfiler = ms_CollectProfiler.CreateChild(nameof(GenerateManifest));
         private static readonly CustomProfiler ms_BuildBundleProfiler = ms_BuildProfiler.CreateChild(nameof(BuildBundle));
         private static readonly CustomProfiler ms_ClearBundleProfiler = ms_BuildProfiler.CreateChild(nameof(ClearAssetBundle));
@@ -54,16 +54,16 @@ namespace HaloFrame
         public readonly static BuildAssetBundleOptions BuildAssetBundleOptions = BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.DeterministicAssetBundle | BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.DisableLoadAssetByFileName | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
 
         /// <summary>
-        /// 打包设置
+        /// ScriptableObject打包设置
         /// </summary>
-        public static BuildSetting buildSetting { get; private set; }
+        public static BuildSettingsSO buildSettingsSO { get; private set; }
 
         #region Path
 
         /// <summary>
-        /// 打包配置
+        /// ScriptableObject打包配置
         /// </summary>
-        public readonly static string BuildSettingPath = Path.GetFullPath("Assets/BuildSetting.xml").Replace("\\", "/");
+        public static string BuildSettingsSOPath = "Assets/BuildSetting.asset";
 
         /// <summary>
         /// 临时目录,临时生成的文件都统一放在该目录
@@ -112,28 +112,6 @@ namespace HaloFrame
 
         #endregion
 
-        #region Build MenuItem 根据BuildSetting.xml配置读取
-
-        [MenuItem("Tools/Build/Windows")]
-        public static void BuildWindows()
-        {
-            Build();
-        }
-
-        [MenuItem("Tools/Build/Android")]
-        public static void BuildAndroid()
-        {
-            Build();
-        }
-
-        [MenuItem("Tools/Build/iOS")]
-        public static void BuildIos()
-        {
-            Build();
-        }
-
-        #endregion
-
         /// <summary>
         /// 切换打包平台
         /// </summary>
@@ -156,29 +134,28 @@ namespace HaloFrame
         }
 
         /// <summary>
-        /// 加载打包配置文件
+        /// 加载ScriptableObject打包配置
         /// </summary>
-        /// <param name="settingPath">打包配置路径</param>
-        private static BuildSetting LoadSetting(string settingPath)
+        /// <param name="settingPath">打包配置资源路径</param>
+        private static BuildSettingsSO LoadSettingSO(string settingPath)
         {
-            buildSetting = XmlUtility.Read<BuildSetting>(settingPath);
-            if (buildSetting == null)
+            buildSettingsSO = AssetDatabase.LoadAssetAtPath<BuildSettingsSO>(settingPath);
+            if (buildSettingsSO == null)
             {
-                throw new Exception($"Load buildSetting failed,SettingPath:{settingPath}.");
+                throw new Exception($"Load buildSettingsSO failed,SettingPath:{settingPath}.");
             }
-            (buildSetting as ISupportInitialize)?.EndInit();
 
-            buildPath = Path.GetFullPath(buildSetting.buildRoot).Replace("\\", "/");
+            buildPath = Path.GetFullPath(buildSettingsSO.buildRoot).Replace("\\", "/");
             if (buildPath.Length > 0 && buildPath[buildPath.Length - 1] != '/')
             {
                 buildPath += "/";
             }
             buildPath += $"{PLATFORM}/";
 
-            return buildSetting;
+            return buildSettingsSO;
         }
 
-        private static void Build()
+        public static void Build()
         {
             ms_BuildProfiler.Start();
 
@@ -187,7 +164,7 @@ namespace HaloFrame
             ms_SwitchPlatformProfiler.Stop();
 
             ms_LoadBuildSettingProfiler.Start();
-            buildSetting = LoadSetting(BuildSettingPath);
+            buildSettingsSO = LoadSettingSO(BuildSettingsSOPath);
             ms_LoadBuildSettingProfiler.Stop();
 
             //搜集bundle信息
@@ -221,12 +198,11 @@ namespace HaloFrame
         /// 搜集打包bundle的信息
         /// </summary>
         /// <returns></returns>
-
         private static Dictionary<string, List<string>> Collect()
         {
             //获取所有在打包设置的文件列表
             ms_CollectBuildSettingFileProfiler.Start();
-            HashSet<string> files = buildSetting.Collect();
+            HashSet<string> files = buildSettingsSO.Collect();
             ms_CollectBuildSettingFileProfiler.Stop();
 
             //搜集所有文件的依赖关系
@@ -254,7 +230,7 @@ namespace HaloFrame
 
             //该字典保存bundle对应的资源集合
             ms_CollectBundleProfiler.Start();
-            Dictionary<string, List<string>> bundleDic = CollectBundle(buildSetting, assetDic, dependencyDic);
+            Dictionary<string, List<string>> bundleDic = CollectBundleSO(buildSettingsSO, assetDic, dependencyDic);
             ms_CollectBundleProfiler.Stop();
 
             //生成Manifest文件
@@ -315,19 +291,20 @@ namespace HaloFrame
             return dependencyDic;
         }
 
+
         /// <summary>
-        /// 搜集bundle对应的ab名字
+        /// 搜集bundle对应的ab名字 (ScriptableObject版本)
         /// </summary>
-        /// <param name="buildSetting"></param>
+        /// <param name="buildSettings"></param>
         /// <param name="assetDic">资源列表</param>
         /// <param name="dependencyDic">资源依赖信息</param>
         /// <returns>bundle包信息</returns>
-        private static Dictionary<string, List<string>> CollectBundle(BuildSetting buildSetting, Dictionary<string, EResourceType> assetDic, Dictionary<string, List<string>> dependencyDic)
+        private static Dictionary<string, List<string>> CollectBundleSO(BuildSettingsSO buildSettings, Dictionary<string, EResourceType> assetDic, Dictionary<string, List<string>> dependencyDic)
         {
             float min = ms_CollectBundleInfoProgress.x;
             float max = ms_CollectBundleInfoProgress.y;
 
-            EditorUtility.DisplayProgressBar($"{nameof(CollectBundle)}", "搜集bundle信息", min);
+            EditorUtility.DisplayProgressBar($"{nameof(CollectBundleSO)}", "搜集bundle信息", min);
 
             Dictionary<string, List<string>> bundleDic = new Dictionary<string, List<string>>();
             //外部资源
@@ -338,7 +315,7 @@ namespace HaloFrame
             {
                 index++;
                 string assetUrl = pair.Key;
-                string bundleName = buildSetting.GetBundleName(assetUrl, pair.Value);
+                string bundleName = buildSettings.GetBundleName(assetUrl, pair.Value);
 
                 //没有bundleName的资源为外部资源
                 if (bundleName == null)
@@ -356,7 +333,7 @@ namespace HaloFrame
 
                 list.Add(assetUrl);
 
-                EditorUtility.DisplayProgressBar($"{nameof(CollectBundle)}", "搜集bundle信息", min + (max - min) * ((float)index / assetDic.Count));
+                EditorUtility.DisplayProgressBar($"{nameof(CollectBundleSO)}", "搜集bundle信息", min + (max - min) * ((float)index / assetDic.Count));
             }
 
             //todo...  外部资源
@@ -379,6 +356,7 @@ namespace HaloFrame
 
             return bundleDic;
         }
+
 
         /// <summary>
         /// 生成资源描述文件

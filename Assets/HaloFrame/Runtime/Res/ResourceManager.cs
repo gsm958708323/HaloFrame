@@ -180,6 +180,10 @@ namespace HaloFrame
             resource.url = url;
             resourceDict.Add(url, resource);
 
+            if (dependencyDict is null)
+            {
+                dependencyDict = new();
+            }
             List<string> dependencies;
             if (dependencyDict.TryGetValue(url, out dependencies))
             {

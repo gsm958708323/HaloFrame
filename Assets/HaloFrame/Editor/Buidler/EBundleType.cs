@@ -16,8 +16,8 @@
         Directory,
 
         /// <summary>
-        /// 以最上的
+        /// 匹配到规则路径作为ab名字
         /// </summary>
-        All
+        Rule
     }
 }

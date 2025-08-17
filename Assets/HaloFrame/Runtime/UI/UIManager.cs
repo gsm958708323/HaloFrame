@@ -215,6 +215,7 @@ namespace HaloFrame
 
             if (view.gameObject != null)
             {
+                // AutoUnload会自动卸载 
                 GameObject.Destroy(view.gameObject);
             }
         }

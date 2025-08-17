@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<BuildSetting ProjectName="HaloFrame" BuildRoot="Assets/AssetBundle">
-<BuildItem AssetPath="Assets/Res" ResourceType="Direct" BundleType="File" Suffix=".prefab" />
-<BuildItem AssetPath="Assets/HaloFrame/Samples/UI/Prefabs" ResourceType="Direct" BundleType="File" Suffix=".prefab" />
-<BuildItem AssetPath="Assets/HaloFrame/Samples/UI/Config" ResourceType="Direct" BundleType="File" Suffix=".asset" />
-</BuildSetting>
