@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using LitJson;
+using UnityEditor.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,12 +12,9 @@ namespace HaloFrame
     public class ResourceManager : IManager
     {
         private bool isEditor;
-        /// <summary>
-        /// 资源对应bundle路径
-        /// </summary>
-        Dictionary<string, string> assetBundleDict;
         Dictionary<string, List<string>> dependencyDict;
-        Dictionary<ushort, string> assetUrlDict;
+
+        Dictionary<string, AssetInfo> assetInfoDict;
         Dictionary<string, AResource> resourceDict;
         List<AResourceAsync> asyncList;
         LinkedList<AResource> waitUnloadList;
@@ -33,22 +32,27 @@ namespace HaloFrame
             this.isEditor = isEditor;
             if (isEditor)
                 return;
+            var assetMapAsset = Resources.Load<TextAsset>(PathTools.AssetMapFileName);
+            assetInfoDict = JsonMapper.ToObject<Dictionary<string, AssetInfo>>(assetMapAsset.ToString());
+
             BundleManager.Instance.Init(platform, getFileCB, offset);
 
-            string manifestFile = getFileCB.Invoke(MANIFEST_BUNDLE);
-            AssetBundle manifestAB = AssetBundle.LoadFromFile(manifestFile);
-            var resourceAsset = manifestAB.LoadAsset(RESOURCE_ASSET_NAME) as TextAsset;
-            var bundleAsset = manifestAB.LoadAsset(BUNDLE_ASSET_NAME) as TextAsset;
-            var dependencyAsset = manifestAB.LoadAsset(DEPENDENCY_ASSET_NAME) as TextAsset;
-            byte[] resourceBytes = resourceAsset.bytes;
-            byte[] bundleBytes = bundleAsset.bytes;
-            byte[] dependencyBytes = dependencyAsset.bytes;
-            manifestAB.Unload(true);
-            manifestAB = null;
 
-            ReadAssetUrl(resourceBytes);
-            ReadBundle(bundleBytes);
-            ReadDependency(dependencyBytes);
+            // string manifestFile = getFileCB.Invoke(MANIFEST_BUNDLE);
+            // // 改成都本地json文件
+            // AssetBundle manifestAB = AssetBundle.LoadFromFile(manifestFile);
+            // var resourceAsset = manifestAB.LoadAsset(RESOURCE_ASSET_NAME) as TextAsset;
+            // var bundleAsset = manifestAB.LoadAsset(BUNDLE_ASSET_NAME) as TextAsset;
+            // var dependencyAsset = manifestAB.LoadAsset(DEPENDENCY_ASSET_NAME) as TextAsset;
+            // byte[] resourceBytes = resourceAsset.bytes;
+            // byte[] bundleBytes = bundleAsset.bytes;
+            // byte[] dependencyBytes = dependencyAsset.bytes;
+            // manifestAB.Unload(true);
+            // manifestAB = null;
+
+            // ReadAssetUrl(resourceBytes);
+            // ReadBundle(bundleBytes);
+            // ReadDependency(dependencyBytes);
         }
 
         public override void Tick(float deltaTime)
@@ -180,20 +184,21 @@ namespace HaloFrame
             resource.url = url;
             resourceDict.Add(url, resource);
 
-            if (dependencyDict is null)
+            if (!isEditor)
             {
-                dependencyDict = new();
-            }
-            List<string> dependencies;
-            if (dependencyDict.TryGetValue(url, out dependencies))
-            {
-                resource.dependencies = new(dependencies.Count);
-                foreach (var depUrl in dependencies)
+                var assetInfo = GetAssetInfo(url);
+                if (assetInfo is not null && assetInfo.Dependency is not null)
                 {
-                    var depResource = LoadInternal(depUrl, async);
-                    resource.dependencies.Add(depResource);
+                    var dependencies = assetInfo.Dependency;
+                    resource.dependencies = new(dependencies.Count);
+                    foreach (var depUrl in dependencies)
+                    {
+                        var depResource = LoadInternal(depUrl, async);
+                        resource.dependencies.Add(depResource);
+                    }
                 }
             }
+
             resource.AddReference();
             resource.Load();
 
@@ -234,74 +239,10 @@ namespace HaloFrame
             Unload(resource);
         }
 
-        private void ReadDependency(byte[] dependencyBytes)
+        public AssetInfo GetAssetInfo(string assetUrl)
         {
-            dependencyDict = new();
-            var stream = new MemoryStream(dependencyBytes);
-            var reader = new BinaryReader(stream);
-            ushort dependencyCount = reader.ReadUInt16();
-            for (int i = 0; i < dependencyCount; i++)
-            {
-                ushort resourceCount = reader.ReadUInt16();
-                ushort assetId = reader.ReadUInt16();
-                string assetUrl = assetUrlDict[assetId];
-                var dependencieList = new List<string>(resourceCount);
-                for (int j = 0; j < resourceCount; j++)
-                {
-                    ushort dependencyAssetId = reader.ReadUInt16();
-                    string dependencyUrl = assetUrlDict[dependencyAssetId];
-                    dependencieList.Add(dependencyUrl);
-                }
-                dependencyDict.Add(assetUrl, dependencieList);
-            }
-        }
-
-        /// <summary>
-        /// 读取所有资源路径对应ab路径
-        /// </summary>
-        /// <param name="bundleBytes"></param>
-        private void ReadBundle(byte[] bundleBytes)
-        {
-            assetBundleDict = new();
-            var stream = new MemoryStream(bundleBytes);
-            var reader = new BinaryReader(stream);
-            // bundle数量
-            ushort bundleCount = reader.ReadUInt16();
-            for (ushort i = 0; i < bundleCount; i++)
-            {
-                string bundleUrl = reader.ReadString();
-                // 一个bundle依赖的资源数量
-                ushort resourceCount = reader.ReadUInt16();
-                for (ushort j = 0; j < resourceCount; j++)
-                {
-                    var assetId = reader.ReadUInt16();
-                    var assetUrl = assetUrlDict[assetId];
-                    assetBundleDict.Add(assetUrl, bundleUrl);
-                }
-            }
-        }
-
-        public string GetAssetBundleUrl(string assetUrl)
-        {
-            assetBundleDict.TryGetValue(assetUrl, out string bundleUrl);
-            return bundleUrl;
-        }
-
-        /// <summary>
-        /// 读取所有资源的路径
-        /// </summary>
-        /// <param name="resourceBytes"></param>
-        void ReadAssetUrl(byte[] resourceBytes)
-        {
-            assetUrlDict = new();
-            var stream = new MemoryStream(resourceBytes);
-            var reader = new BinaryReader(stream);
-            ushort count = reader.ReadUInt16();
-            for (ushort i = 0; i < count; i++)
-            {
-                var assetUrl = reader.ReadString();
-                assetUrlDict.Add(i, assetUrl);
-            }
+            assetInfoDict.TryGetValue(assetUrl, out AssetInfo info);
+            return info;
         }
     }
 }

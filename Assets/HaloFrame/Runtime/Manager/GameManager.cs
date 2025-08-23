@@ -27,8 +27,11 @@ public class GameManager : GameManagerBase
     private string prefixPath;
     void InitResource()
     {
-        string platform = GetPlatform();
-        prefixPath = Path.GetFullPath(Path.Combine(Application.dataPath, "AssetBundle")).Replace("\\", "/");
+        string platform = PathTools.Platform;
+        print(PathTools.StreamingAssetsPath);
+
+        // todo 改成沙盒目录
+        prefixPath = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde".Replace("\\", "/");
         prefixPath += "/" + platform;
         bool isEditorMode = PlayerPrefs.GetInt("IsEditorMode", 1) == 1;
         Resource.Init(platform, GetFileUrl, isEditorMode);
@@ -37,22 +40,6 @@ public class GameManager : GameManagerBase
     private string GetFileUrl(string url)
     {
         return $"{prefixPath}/{url}";
-    }
-    private string GetPlatform()
-    {
-        switch (Application.platform)
-        {
-            case RuntimePlatform.WindowsEditor:
-            case RuntimePlatform.WindowsPlayer:
-                return "Windows";
-            case RuntimePlatform.Android:
-                return "Android";
-            case RuntimePlatform.IPhonePlayer:
-                return "iOS";
-            default:
-                Debugger.LogError($"未支持的平台:{Application.platform}", LogDomain.Res);
-                return "";
-        }
     }
 
     /*

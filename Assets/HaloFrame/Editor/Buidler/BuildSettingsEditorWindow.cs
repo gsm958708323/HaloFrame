@@ -20,14 +20,13 @@ namespace HaloFrame
             window.Show();
         }
 
-        string settingPath = "Assets/BuildSetting.asset";
         protected override OdinMenuTree BuildMenuTree()
         {
-            var setting = AssetDatabase.LoadAssetAtPath<BuildSettingsSO>(settingPath);
+            var setting = AssetDatabase.LoadAssetAtPath<BuildSettingsSO>(PathTools.BuildSettingPath);
             if (setting == null)
             {
                 setting = ScriptableObject.CreateInstance<BuildSettingsSO>();
-                AssetDatabase.CreateAsset(setting, settingPath);
+                AssetDatabase.CreateAsset(setting, PathTools.BuildSettingPath);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }

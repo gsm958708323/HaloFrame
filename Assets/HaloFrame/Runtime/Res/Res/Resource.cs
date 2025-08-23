@@ -21,13 +21,19 @@ namespace HaloFrame
                 return;
             }
 
-            string bundleUrl = GameManager.Resource.GetAssetBundleUrl(url);
-            if (string.IsNullOrEmpty(bundleUrl))
+            var assetInfo = GameManager.Resource.GetAssetInfo(url);
+            if (assetInfo is null)
+            {
+                Debugger.LogError($"资源没有找到对应的AssetInfo {url}", LogDomain.Res);
+                return;
+            }
+            var bundleUrl = assetInfo.ABUrl;
+            if (string.IsNullOrEmpty(assetInfo.ABUrl))
             {
                 Debugger.LogError($"资源没有找到对应的bundle路径 {url}", LogDomain.Res);
                 return;
             }
-            
+
             bundle = BundleManager.Instance.Load(bundleUrl);
             LoadAsset();
         }

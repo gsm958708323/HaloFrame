@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 using System.Threading.Tasks;
+using LitJson;
 
 namespace HaloFrame
 {
@@ -22,7 +23,7 @@ namespace HaloFrame
 
         private static readonly CustomProfiler ms_BuildProfiler = new CustomProfiler(nameof(Builder));
         private static readonly CustomProfiler ms_LoadBuildSettingProfiler = ms_BuildProfiler.CreateChild(nameof(LoadSettingSO));
-        private static readonly CustomProfiler ms_SwitchPlatformProfiler = ms_BuildProfiler.CreateChild(nameof(SwitchPlatform));
+
         private static readonly CustomProfiler ms_CollectProfiler = ms_BuildProfiler.CreateChild(nameof(Collect));
         private static readonly CustomProfiler ms_CollectBuildSettingFileProfiler = ms_CollectProfiler.CreateChild("CollectBuildSettingFile");
         private static readonly CustomProfiler ms_CollectDependencyProfiler = ms_CollectProfiler.CreateChild(nameof(CollectDependency));
@@ -31,14 +32,7 @@ namespace HaloFrame
         private static readonly CustomProfiler ms_BuildBundleProfiler = ms_BuildProfiler.CreateChild(nameof(BuildBundle));
         private static readonly CustomProfiler ms_ClearBundleProfiler = ms_BuildProfiler.CreateChild(nameof(ClearAssetBundle));
         private static readonly CustomProfiler ms_BuildManifestBundleProfiler = ms_BuildProfiler.CreateChild(nameof(BuildManifest));
-
-#if UNITY_IOS
-        private const string PLATFORM = "iOS";
-#elif UNITY_ANDROID
-        private const string PLATFORM = "Android";
-#else
-        private const string PLATFORM = "Windows";
-#endif
+        private static string PLATFORM = PathTools.Platform;
         //bundle后缀
         public const string BUNDLE_SUFFIX = ".ab";
         public const string BUNDLE_MANIFEST_SUFFIX = ".manifest";
@@ -59,11 +53,6 @@ namespace HaloFrame
         public static BuildSettingsSO buildSettingsSO { get; private set; }
 
         #region Path
-
-        /// <summary>
-        /// ScriptableObject打包配置
-        /// </summary>
-        public static string BuildSettingsSOPath = "Assets/BuildSetting.asset";
 
         /// <summary>
         /// 临时目录,临时生成的文件都统一放在该目录
@@ -113,27 +102,6 @@ namespace HaloFrame
         #endregion
 
         /// <summary>
-        /// 切换打包平台
-        /// </summary>
-        public static void SwitchPlatform()
-        {
-            string platform = PLATFORM;
-
-            switch (platform)
-            {
-                case "windows":
-                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-                    break;
-                case "android":
-                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
-                    break;
-                case "ios":
-                    EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.iOS, BuildTarget.iOS);
-                    break;
-            }
-        }
-
-        /// <summary>
         /// 加载ScriptableObject打包配置
         /// </summary>
         /// <param name="settingPath">打包配置资源路径</param>
@@ -159,12 +127,8 @@ namespace HaloFrame
         {
             ms_BuildProfiler.Start();
 
-            ms_SwitchPlatformProfiler.Start();
-            SwitchPlatform();
-            ms_SwitchPlatformProfiler.Stop();
-
             ms_LoadBuildSettingProfiler.Start();
-            buildSettingsSO = LoadSettingSO(BuildSettingsSOPath);
+            buildSettingsSO = LoadSettingSO(PathTools.BuildSettingPath);
             ms_LoadBuildSettingProfiler.Stop();
 
             //搜集bundle信息
@@ -375,171 +339,30 @@ namespace HaloFrame
             if (!Directory.Exists(TempPath))
                 Directory.CreateDirectory(TempPath);
 
-            //资源映射id
-            Dictionary<string, ushort> assetIdDic = new Dictionary<string, ushort>();
-
-            #region 生成资源描述信息
+            var resUrl2AB = new Dictionary<string, string>();
+            foreach (var item1 in bundleDic)
             {
-                //删除资源描述文本文件
-                if (File.Exists(ResourcePath_Text))
-                    File.Delete(ResourcePath_Text);
-
-                //删除资源描述二进制文件
-                if (File.Exists(ResourcePath_Binary))
-                    File.Delete(ResourcePath_Binary);
-
-                //写入资源列表
-                StringBuilder resourceSb = new StringBuilder();
-                MemoryStream resourceMs = new MemoryStream();
-                BinaryWriter resourceBw = new BinaryWriter(resourceMs);
-                if (assetDic.Count > ushort.MaxValue)
+                foreach (var resUrl in item1.Value)
                 {
-                    EditorUtility.ClearProgressBar();
-                    throw new Exception($"资源个数超出{ushort.MaxValue}");
+                    resUrl2AB.Add(resUrl, item1.Key);
                 }
-
-                //写入个数
-                resourceBw.Write((ushort)assetDic.Count);
-                List<string> keys = new List<string>(assetDic.Keys);
-                keys.Sort();
-
-                for (ushort i = 0; i < keys.Count; i++)
-                {
-                    string assetUrl = keys[i];
-                    assetIdDic.Add(assetUrl, i);
-                    resourceSb.AppendLine($"{i}\t{assetUrl}");
-                    resourceBw.Write(assetUrl);
-                }
-
-                resourceMs.Flush();
-                byte[] buffer = resourceMs.GetBuffer();
-                resourceBw.Close();
-                //写入资源描述文本文件
-                File.WriteAllText(ResourcePath_Text, resourceSb.ToString(), Encoding.UTF8);
-                File.WriteAllBytes(ResourcePath_Binary, buffer);
             }
-            #endregion
-
-            EditorUtility.DisplayProgressBar($"{nameof(GenerateManifest)}", "生成打包信息", min + (max - min) * 0.3f);
-
-            #region 生成bundle描述信息
+            var assetMap = new Dictionary<string, AssetInfo>();
+            foreach (var item in assetDic)
             {
-                //删除bundle描述文本文件
-                if (File.Exists(BundlePath_Text))
-                    File.Delete(BundlePath_Text);
-
-                //删除bundle描述二进制文件
-                if (File.Exists(BundlePath_Binary))
-                    File.Delete(BundlePath_Binary);
-
-                //写入bundle信息
-                StringBuilder bundleSb = new StringBuilder();
-                MemoryStream bundleMs = new MemoryStream();
-                BinaryWriter bundleBw = new BinaryWriter(bundleMs);
-
-                //写入bundle个数
-                bundleBw.Write((ushort)bundleDic.Count);
-                foreach (var kv in bundleDic)
+                var resName = item.Key;
+                resUrl2AB.TryGetValue(resName, out var abName);
+                dependencyDic.TryGetValue(resName, out var dependency);
+                var info = new AssetInfo
                 {
-                    string bundleName = kv.Key;
-                    List<string> assets = kv.Value;
-
-                    //写入bundle
-                    bundleSb.AppendLine(bundleName);
-                    bundleBw.Write(bundleName);
-
-                    //写入资源个数
-                    bundleBw.Write((ushort)assets.Count);
-
-                    for (int i = 0; i < assets.Count; i++)
-                    {
-                        string assetUrl = assets[i];
-                        ushort assetId = assetIdDic[assetUrl];
-                        bundleSb.AppendLine($"\t{assetUrl}");
-                        //写入资源id,用id替换字符串可以节省内存
-                        bundleBw.Write(assetId);
-                    }
-                }
-
-                bundleMs.Flush();
-                byte[] buffer = bundleMs.GetBuffer();
-                bundleBw.Close();
-                //写入资源描述文本文件
-                File.WriteAllText(BundlePath_Text, bundleSb.ToString(), Encoding.UTF8);
-                File.WriteAllBytes(BundlePath_Binary, buffer);
+                    ResUrl = resName,
+                    ABUrl = abName,
+                    Dependency = dependency,
+                };
+                assetMap.Add(resName, info);
             }
-            #endregion
-
-            EditorUtility.DisplayProgressBar($"{nameof(GenerateManifest)}", "生成打包信息", min + (max - min) * 0.8f);
-
-            #region 生成资源依赖描述信息
-            {
-                //删除资源依赖描述文本文件
-                if (File.Exists(DependencyPath_Text))
-                    File.Delete(DependencyPath_Text);
-
-                //删除资源依赖描述二进制文件
-                if (File.Exists(DependencyPath_Binary))
-                    File.Delete(DependencyPath_Binary);
-
-                //写入资源依赖信息
-                StringBuilder dependencySb = new StringBuilder();
-                MemoryStream dependencyMs = new MemoryStream();
-                BinaryWriter dependencyBw = new BinaryWriter(dependencyMs);
-
-                //用于保存资源依赖链
-                List<List<ushort>> dependencyList = new List<List<ushort>>();
-                foreach (var kv in dependencyDic)
-                {
-                    List<string> dependencyAssets = kv.Value;
-
-                    //依赖为0的不需要写入
-                    if (dependencyAssets.Count == 0)
-                        continue;
-
-                    string assetUrl = kv.Key;
-
-                    List<ushort> ids = new List<ushort>();
-                    ids.Add(assetIdDic[assetUrl]);
-
-                    string content = assetUrl;
-                    for (int i = 0; i < dependencyAssets.Count; i++)
-                    {
-                        string dependencyAssetUrl = dependencyAssets[i];
-                        content += $"\t{dependencyAssetUrl}";
-                        ids.Add(assetIdDic[dependencyAssetUrl]);
-                    }
-
-                    dependencySb.AppendLine(content);
-
-                    if (ids.Count > byte.MaxValue)
-                    {
-                        EditorUtility.ClearProgressBar();
-                        throw new Exception($"资源{assetUrl}的依赖超出一个字节上限:{byte.MaxValue}");
-                    }
-
-                    dependencyList.Add(ids);
-                }
-
-                //写入依赖链个数
-                dependencyBw.Write((ushort)dependencyList.Count);
-                for (int i = 0; i < dependencyList.Count; i++)
-                {
-                    //写入资源数
-                    List<ushort> ids = dependencyList[i];
-                    dependencyBw.Write((ushort)ids.Count);
-                    for (int ii = 0; ii < ids.Count; ii++)
-                        dependencyBw.Write(ids[ii]);
-                }
-
-                dependencyMs.Flush();
-                byte[] buffer = dependencyMs.GetBuffer();
-                dependencyBw.Close();
-                //写入资源依赖描述文本文件
-                File.WriteAllText(DependencyPath_Text, dependencySb.ToString(), Encoding.UTF8);
-                File.WriteAllBytes(DependencyPath_Binary, buffer);
-            }
-            #endregion
+            var assetMapJson = JsonMapper.ToJson(assetMap);
+            FileTools.SafeWriteAllText(PathTools.AssetMapPath, assetMapJson);
 
 
             AssetDatabase.Refresh();
@@ -591,6 +414,8 @@ namespace HaloFrame
             manifest.assetBundleName = $"{MANIFEST}{BUNDLE_SUFFIX}";
             manifest.assetNames = new string[3]
             {
+                // manifest必须打包，可以根据
+                // todo 测试作用（放到manifest里面支持资源热更）
                 ResourcePath_Binary.Replace(prefix,""),
                 BundlePath_Binary.Replace(prefix,""),
                 DependencyPath_Binary.Replace(prefix,""),

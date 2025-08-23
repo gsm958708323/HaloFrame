@@ -64,7 +64,7 @@ namespace HaloFrame
         [Button("打开输出目录")]
         public void OpenOutPath()
         {
-            // Process.Start(Path.GetFullPath(_buildPath));
+            System.Diagnostics.Process.Start(buildRoot);
         }
 
         [BoxGroup("按钮")]
@@ -72,7 +72,7 @@ namespace HaloFrame
         [Button("打开沙盒目录")]
         public void OpenPersistentPath()
         {
-            // Process.Start(Path.GetFullPath(_buildPath));
+            System.Diagnostics.Process.Start(Application.persistentDataPath);
         }
 
         [HideInInspector]

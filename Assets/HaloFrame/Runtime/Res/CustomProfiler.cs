@@ -72,7 +72,7 @@ namespace HaloFrame
         {
             if (m_Timestamp != -1)
             {
-                throw new Exception($"{nameof(CustomProfiler)} {nameof(Start)} error, repeat start, name: {m_Name}");
+                throw new Exception($"{nameof(CustomProfiler)} {nameof(Start)} error, repeat start, name: {m_Name} ");
             }
 
             m_Timestamp = ms_Stopwatch.ElapsedTicks;
