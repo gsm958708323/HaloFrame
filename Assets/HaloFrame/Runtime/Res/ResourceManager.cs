@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using LitJson;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -16,7 +15,7 @@ namespace HaloFrame
         List<AResourceAsync> asyncList;
         LinkedList<AResource> waitUnloadList;
 
-        public void Init(string platform, Func<string, string> getFileCB, bool isEditor = false, ulong offset = 0)
+        public void Init(string bundleRootDir, bool isEditor = false, ulong offset = 0)
         {
             resourceDict = new();
             asyncList = new();
@@ -24,10 +23,11 @@ namespace HaloFrame
             this.isEditor = isEditor;
             if (isEditor)
                 return;
-            var assetMapAsset = Resources.Load<TextAsset>(PathTools.AssetMapFileName);
-            assetInfoDict = JsonMapper.ToObject<Dictionary<string, AssetInfo>>(assetMapAsset.ToString());
 
-            BundleManager.Instance.Init(platform, getFileCB, offset);
+            var assetMapPath = Path.Combine(bundleRootDir, "..", PathTools.AssetMapFileName);
+            assetInfoDict = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(assetMapPath));
+
+            BundleManager.Instance.Init(bundleRootDir, offset);
         }
 
         public override void Tick(float deltaTime)

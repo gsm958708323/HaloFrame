@@ -24,20 +24,13 @@ public class GameManager : GameManagerBase
         UI = GetManager<UIManager>();
     }
 
-    private string prefixPath;
     void InitResource()
     {
         string platform = PathTools.Platform;
         // todo 改成沙盒目录
-        prefixPath = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde".Replace("\\", "/");
-        prefixPath += "/" + platform;
+        var bundleRootDir = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde\Windows\HotUpdate_1.0.0".Replace("\\", "/");
         bool isEditorMode = PlayerPrefs.GetInt("IsEditorMode", 1) == 1;
-        Resource.Init(platform, GetFileUrl, isEditorMode);
-    }
-
-    private string GetFileUrl(string url)
-    {
-        return $"{prefixPath}/{url}";
+        Resource.Init(bundleRootDir, isEditorMode);
     }
 
     /*

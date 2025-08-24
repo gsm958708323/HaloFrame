@@ -11,8 +11,11 @@ namespace HaloFrame
         public List<string> Dependency;
         public string ABUrl;
         public string Version;
-        public string Size;
         public string Md5;
-
+        public long Size;
+        /// <summary>
+        /// 是否需要更更新
+        /// </summary>
+        public bool Update;
     }
 }

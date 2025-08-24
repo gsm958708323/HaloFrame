@@ -6,19 +6,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 using System.Threading.Tasks;
-using LitJson;
+using System.Drawing.Printing;
 
 namespace HaloFrame
 {
     public static class Builder
     {
-
         public static readonly Vector2 collectRuleFileProgress = new Vector2(0, 0.2f);
         private static readonly Vector2 ms_GetDependencyProgress = new Vector2(0.2f, 0.4f);
         private static readonly Vector2 ms_CollectBundleInfoProgress = new Vector2(0.4f, 0.5f);
         private static readonly Vector2 ms_GenerateBuildInfoProgress = new Vector2(0.5f, 0.6f);
-        private static readonly Vector2 ms_BuildBundleProgress = new Vector2(0.6f, 0.7f);
-        private static readonly Vector2 ms_ClearBundleProgress = new Vector2(0.7f, 0.9f);
+        private static readonly Vector2 ms_BuildBundleProgress = new Vector2(0.6f, 0.9f);
+        private static readonly Vector2 ms_ClearBundleProgress = new Vector2(0.9f, 1f);
         private static readonly Vector2 ms_BuildManifestProgress = new Vector2(0.9f, 1f);
 
         private static readonly CustomProfiler ms_BuildProfiler = new CustomProfiler(nameof(Builder));
@@ -31,6 +30,7 @@ namespace HaloFrame
         private static readonly CustomProfiler ms_GenerateManifestProfiler = ms_CollectProfiler.CreateChild(nameof(GenerateResMap));
         private static readonly CustomProfiler ms_BuildBundleProfiler = ms_BuildProfiler.CreateChild(nameof(BuildBundle));
         private static readonly CustomProfiler ms_ClearBundleProfiler = ms_BuildProfiler.CreateChild(nameof(ClearAssetBundle));
+        private static readonly CustomProfiler ms_BuildManifestBundleProfiler = ms_BuildProfiler.CreateChild(nameof(BuildManifest));
         private static string PLATFORM = PathTools.Platform;
         //bundle后缀
         public const string BUNDLE_SUFFIX = ".ab";
@@ -56,7 +56,11 @@ namespace HaloFrame
         /// <summary>
         /// 打包目录
         /// </summary>
-        public static string buildPath { get; set; }
+        public static string buildPath;
+        /// <summary>
+        /// 热更包目录
+        /// </summary>
+        public static string hotUpdateBuildPath;
 
         #endregion
 
@@ -72,12 +76,15 @@ namespace HaloFrame
                 throw new Exception($"Load buildSettingsSO failed,SettingPath:{settingPath}.");
             }
 
-            buildPath = Path.GetFullPath(buildSettingsSO.buildRoot).Replace("\\", "/");
-            if (buildPath.Length > 0 && buildPath[buildPath.Length - 1] != '/')
-            {
-                buildPath += "/";
-            }
-            buildPath += $"{PLATFORM}/";
+            // buildPath = buildSettingsSO.buildRoot;
+            // if (buildPath.Length > 0 && buildPath[buildPath.Length - 1] != '/')
+            // {
+            //     buildPath += "/";
+            // }
+            // buildPath += $"{PLATFORM}/";
+
+            buildPath = PathTools.Combine(buildSettingsSO.buildRoot, PLATFORM);
+            hotUpdateBuildPath = PathTools.Combine(buildPath, $"{PathTools.HotUpdateDir}_{buildSettingsSO.version}/");
 
             return buildSettingsSO;
         }
@@ -97,12 +104,17 @@ namespace HaloFrame
 
             //打包assetbundle
             ms_BuildBundleProfiler.Start();
-            BuildBundle(bundleDic);
+            BuildBundle(hotUpdateBuildPath, bundleDic);
             ms_BuildBundleProfiler.Stop();
+
+            //打包Manifest
+            ms_BuildManifestBundleProfiler.Start();
+            BuildManifest();
+            ms_BuildManifestBundleProfiler.Stop();
 
             //清空多余文件
             ms_ClearBundleProfiler.Start();
-            ClearAssetBundle(buildPath, bundleDic);
+            ClearAssetBundle(hotUpdateBuildPath, bundleDic);
             ms_ClearBundleProfiler.Stop();
 
             EditorUtility.ClearProgressBar();
@@ -112,11 +124,53 @@ namespace HaloFrame
             Debug.Log($"打包完成{ms_BuildProfiler}");
         }
 
+        public static void BuildUpdate()
+        {
+            var path = PathTools.Combine(buildSettingsSO.buildRoot, PathTools.AssetMapFileName);
+            if (!File.Exists(path))
+            {
+                Debugger.LogError("未生成资源文件，请先打包游戏！");
+                return;
+            }
+
+
+            ms_BuildProfiler.Start();
+            ms_LoadBuildSettingProfiler.Start();
+            buildSettingsSO = LoadSettingSO(PathTools.BuildSettingPath);
+            ms_LoadBuildSettingProfiler.Stop();
+
+            //搜集bundle信息
+            ms_CollectProfiler.Start();
+            Dictionary<string, List<string>> bundleDic = Collect(true);
+            ms_CollectProfiler.Stop();
+
+            //打包assetbundle
+            ms_BuildBundleProfiler.Start();
+            BuildBundle(hotUpdateBuildPath, bundleDic);
+            ms_BuildBundleProfiler.Stop();
+
+            //打包Manifest
+            ms_BuildManifestBundleProfiler.Start();
+            BuildManifest();
+            ms_BuildManifestBundleProfiler.Stop();
+
+            //清空多余文件
+            ms_ClearBundleProfiler.Start();
+            ClearAssetBundle(hotUpdateBuildPath, bundleDic);
+            ms_ClearBundleProfiler.Stop();
+
+            EditorUtility.ClearProgressBar();
+
+            ms_BuildProfiler.Stop();
+
+            Debug.Log($"热更包构建完成{ms_BuildProfiler}");
+        }
+
         /// <summary>
         /// 搜集打包bundle的信息
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<string, List<string>> Collect()
+        private static Dictionary<string, List<string>> Collect(bool buildHotUpdate = false)
         {
             //获取所有在打包设置的文件列表
             ms_CollectBuildSettingFileProfiler.Start();
@@ -148,15 +202,37 @@ namespace HaloFrame
 
             //该字典保存bundle对应的资源集合
             ms_CollectBundleProfiler.Start();
+            //此bundle被哪些资源使用
             Dictionary<string, List<string>> bundleDic = CollectBundleSO(buildSettingsSO, assetDic, dependencyDic);
             ms_CollectBundleProfiler.Stop();
 
-            //生成Manifest文件
+            //生成资源映射文件
             ms_GenerateManifestProfiler.Start();
-            GenerateResMap(assetDic, bundleDic, dependencyDic);
+            GenerateResMap(assetDic, bundleDic, dependencyDic, buildHotUpdate);
             ms_GenerateManifestProfiler.Stop();
 
             return bundleDic;
+        }
+
+        /// <summary>
+        /// 打包Manifest，方便获取ab包的依赖信息
+        /// </summary>
+        private static void BuildManifest()
+        {
+            float min = ms_BuildManifestProgress.x;
+            float max = ms_BuildManifestProgress.y;
+
+            EditorUtility.DisplayProgressBar($"{nameof(BuildManifest)}", "将Manifest打包成AssetBundle", min);
+            AssetBundleBuild manifest = new AssetBundleBuild();
+            var name = $"{MANIFEST}{BUNDLE_SUFFIX}";
+            manifest.assetBundleName = name;
+            manifest.assetNames = new string[1] { MANIFEST }; // 可以存放一些全局配置，一起打到Manifest里面
+
+            EditorUtility.DisplayProgressBar($"{nameof(BuildManifest)}", "将Manifest打包成AssetBundle", min + (max - min) * 0.5f);
+
+            AssetBundleManifest assetBundleManifest = BuildPipeline.BuildAssetBundles(hotUpdateBuildPath, new AssetBundleBuild[] { manifest }, BuildAssetBundleOptions, EditorUserBuildSettings.activeBuildTarget);
+
+            EditorUtility.DisplayProgressBar($"{nameof(BuildManifest)}", "将Manifest打包成AssetBundle", max);
         }
 
         /// <summary>
@@ -211,12 +287,12 @@ namespace HaloFrame
 
 
         /// <summary>
-        /// 搜集bundle对应的ab名字 (ScriptableObject版本)
+        /// 搜集bundle对应的ab名字
         /// </summary>
         /// <param name="buildSettings"></param>
         /// <param name="assetDic">资源列表</param>
         /// <param name="dependencyDic">资源依赖信息</param>
-        /// <returns>bundle包信息</returns>
+        /// <returns>一个bundle被哪些资源使用（bundleUrl: AssetUrlList）</returns>
         private static Dictionary<string, List<string>> CollectBundleSO(BuildSettingsSO buildSettings, Dictionary<string, EResourceType> assetDic, Dictionary<string, List<string>> dependencyDic)
         {
             float min = ms_CollectBundleInfoProgress.x;
@@ -282,7 +358,7 @@ namespace HaloFrame
         /// <param name="bundleDic">bundle包信息</param>
         /// <param name="dependencyDic">资源依赖信息</param>
         /// </summary>
-        private static void GenerateResMap(Dictionary<string, EResourceType> assetDic, Dictionary<string, List<string>> bundleDic, Dictionary<string, List<string>> dependencyDic)
+        private static void GenerateResMap(Dictionary<string, EResourceType> assetDic, Dictionary<string, List<string>> bundleDic, Dictionary<string, List<string>> dependencyDic, bool buildHotUpdate = false)
         {
             float min = ms_GenerateBuildInfoProgress.x;
             float max = ms_GenerateBuildInfoProgress.y;
@@ -308,11 +384,13 @@ namespace HaloFrame
                     ResUrl = resName,
                     ABUrl = abName,
                     Dependency = dependency,
+                    Version = buildSettingsSO.version,
+                    Md5 = FileTools.CreateMd5ForFile(resName),
+                    Size = FileTools.GetFileSize(resName)
                 };
                 assetMap.Add(resName, info);
             }
-            var assetMapJson = JsonMapper.ToJson(assetMap);
-            FileTools.SafeWriteAllText(PathTools.AssetMapPath, assetMapJson);
+            UpdateResMap(assetMap, buildHotUpdate);
 
 
             AssetDatabase.Refresh();
@@ -322,13 +400,40 @@ namespace HaloFrame
             EditorUtility.ClearProgressBar();
         }
 
+        public static void UpdateResMap(Dictionary<string, AssetInfo> assetMap, bool buildHotUpdate = false)
+        {
+            if (!buildHotUpdate)
+            {
+                var assetMapJson = JsonTools.ToJson(assetMap);
+                FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.AssetMapFileName), assetMapJson);
+            }
+            else
+            {
+                var path = PathTools.Combine(buildPath, PathTools.AssetMapFileName);
+                var oldAssetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(path));
+                foreach (var mapItem in assetMap)
+                {
+                    oldAssetMap.TryGetValue(mapItem.Key, out var oldAssetInfo);
+                    var assetInfo = mapItem.Value;
+                    if (oldAssetInfo is null || oldAssetInfo.Md5 != assetInfo.Md5)
+                    {
+                        // 新增或md5不一致则需要热更
+                        assetInfo.Update = true;
+                    }
+                }
+
+                var assetMapJson = JsonTools.ToJson(assetMap);
+                FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.AssetMapFileName), assetMapJson);
+            }
+        }
+
         /// <summary>
         /// 打包AssetBundle
         /// <param name="assetDic">资源列表</param>
         /// <param name="bundleDic">bundle包信息</param>
         /// <param name="dependencyDic">资源依赖信息</param>
         /// </summary>
-        private static AssetBundleManifest BuildBundle(Dictionary<string, List<string>> bundleDic)
+        private static AssetBundleManifest BuildBundle(string buildPath, Dictionary<string, List<string>> bundleDic)
         {
             float min = ms_BuildBundleProgress.x;
             float max = ms_BuildBundleProgress.y;
@@ -338,6 +443,7 @@ namespace HaloFrame
             if (!Directory.Exists(buildPath))
                 Directory.CreateDirectory(buildPath);
 
+            // 此接口的路径最后必须以'/'结尾，否则不会生成ab文件
             AssetBundleManifest manifest = BuildPipeline.BuildAssetBundles(buildPath, GetBuilds(bundleDic), BuildAssetBundleOptions, EditorUserBuildSettings.activeBuildTarget);
 
             EditorUtility.DisplayProgressBar($"{nameof(BuildBundle)}", "打包AssetBundle", max);
@@ -367,7 +473,7 @@ namespace HaloFrame
         }
 
         /// <summary>
-        /// 清空多余的assetbundle
+        /// 清空多余的assetbundle，没有在bundleDict中的文件都会被删除掉
         /// </summary>
         /// <param name="path">打包路径</param>
         /// <param name="bundleDic"></param>

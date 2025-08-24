@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using System.IO;
-using System.Diagnostics;
 using System;
 using UnityEditor;
-using System.Drawing.Printing;
 
 namespace HaloFrame
 {
@@ -57,6 +55,7 @@ namespace HaloFrame
         [Button("构建热更包")]
         public void BuildHot()
         {
+            Builder.BuildUpdate();
         }
 
         [BoxGroup("按钮")]
@@ -73,6 +72,14 @@ namespace HaloFrame
         public void OpenPersistentPath()
         {
             System.Diagnostics.Process.Start(Application.persistentDataPath);
+        }
+
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第二行")]
+        [Button("删除输出目录")]
+        public void DeleteOutPath()
+        {
+            FileTools.SafeDeleteDir(buildRoot);
         }
 
         [HideInInspector]

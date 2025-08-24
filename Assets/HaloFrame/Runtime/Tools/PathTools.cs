@@ -9,20 +9,7 @@ namespace HaloFrame
         public const string AssetBundlesDir = "AssetBundles";
         public static string HotUpdateDir = "HotUpdate";
         public static string BuildSettingPath = "Assets/Resources/BuildSetting.asset";
-        public static string AssetMapFileName = "AssetMap";
-
-        private static string assetMapPath;
-        public static string AssetMapPath
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(assetMapPath))
-                {
-                    assetMapPath = Path.Combine(Application.dataPath, "Resources", $"{AssetMapFileName}.json");
-                }
-                return assetMapPath;
-            }
-        }
+        public static string AssetMapFileName = "AssetMap.json";
 
         private static string streamingAssetsPath;
         public static string StreamingAssetsPath
@@ -90,5 +77,15 @@ namespace HaloFrame
             }
         }
 
+
+        /// <summary>
+        /// 拼接目录，有些unity的接口不支持"\"目录识别
+        /// </summary>
+        /// <param name="paths"></param>
+        /// <returns></returns>
+        public static string Combine(params string[] paths)
+        {
+            return Path.Combine(paths).Replace("\\", "/");
+        }
     }
 }

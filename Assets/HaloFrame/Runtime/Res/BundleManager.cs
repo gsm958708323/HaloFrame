@@ -1,13 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace HaloFrame
 {
     public class BundleManager : Singleton<BundleManager>
     {
-        private Func<string, string> getFileCB;
+        /// <summary>
+        /// ab资源的根目录
+        /// </summary>
+        private string bundleRootDir;
         /// <summary>
         /// 偏移量，默认为0（可以跳过自定义加密数据）
         /// </summary>
@@ -34,11 +38,11 @@ namespace HaloFrame
             asyncList = new();
         }
 
-        public void Init(string platform, Func<string, string> getFilaCB, ulong offset)
+        public void Init(string bundleRootDir, ulong offset)
         {
-            this.getFileCB = getFilaCB;
             this.offset = offset;
-            string manifestFile = getFilaCB.Invoke(platform);
+            this.bundleRootDir = bundleRootDir;
+            string manifestFile = Path.Combine(bundleRootDir, PathTools.Platform);
             AssetBundle assetBundle = AssetBundle.LoadFromFile(manifestFile);
             var objests = assetBundle.LoadAllAssets();
             if (objests.Length == 0)
@@ -172,13 +176,7 @@ namespace HaloFrame
         /// <returns></returns>
         internal string GetFileUrl(string url)
         {
-            if (getFileCB == null)
-            {
-                Debugger.LogError($"请设置getFileCB {url}", LogDomain.Res);
-                return "";
-            }
-
-            return getFileCB.Invoke(url);
+            return Path.Combine(bundleRootDir, url);
         }
     }
 }
