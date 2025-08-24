@@ -28,8 +28,6 @@ public class GameManager : GameManagerBase
     void InitResource()
     {
         string platform = PathTools.Platform;
-        print(PathTools.StreamingAssetsPath);
-
         // todo 改成沙盒目录
         prefixPath = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde".Replace("\\", "/");
         prefixPath += "/" + platform;

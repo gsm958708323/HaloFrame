@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using LitJson;
-using UnityEditor.UI;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -12,17 +11,10 @@ namespace HaloFrame
     public class ResourceManager : IManager
     {
         private bool isEditor;
-        Dictionary<string, List<string>> dependencyDict;
-
         Dictionary<string, AssetInfo> assetInfoDict;
         Dictionary<string, AResource> resourceDict;
         List<AResourceAsync> asyncList;
         LinkedList<AResource> waitUnloadList;
-
-        private const string MANIFEST_BUNDLE = "manifest.ab";
-        private const string RESOURCE_ASSET_NAME = "Assets/Temp/Resource.bytes";
-        private const string BUNDLE_ASSET_NAME = "Assets/Temp/Bundle.bytes";
-        private const string DEPENDENCY_ASSET_NAME = "Assets/Temp/Dependency.bytes";
 
         public void Init(string platform, Func<string, string> getFileCB, bool isEditor = false, ulong offset = 0)
         {
@@ -36,23 +28,6 @@ namespace HaloFrame
             assetInfoDict = JsonMapper.ToObject<Dictionary<string, AssetInfo>>(assetMapAsset.ToString());
 
             BundleManager.Instance.Init(platform, getFileCB, offset);
-
-
-            // string manifestFile = getFileCB.Invoke(MANIFEST_BUNDLE);
-            // // 改成都本地json文件
-            // AssetBundle manifestAB = AssetBundle.LoadFromFile(manifestFile);
-            // var resourceAsset = manifestAB.LoadAsset(RESOURCE_ASSET_NAME) as TextAsset;
-            // var bundleAsset = manifestAB.LoadAsset(BUNDLE_ASSET_NAME) as TextAsset;
-            // var dependencyAsset = manifestAB.LoadAsset(DEPENDENCY_ASSET_NAME) as TextAsset;
-            // byte[] resourceBytes = resourceAsset.bytes;
-            // byte[] bundleBytes = bundleAsset.bytes;
-            // byte[] dependencyBytes = dependencyAsset.bytes;
-            // manifestAB.Unload(true);
-            // manifestAB = null;
-
-            // ReadAssetUrl(resourceBytes);
-            // ReadBundle(bundleBytes);
-            // ReadDependency(dependencyBytes);
         }
 
         public override void Tick(float deltaTime)
