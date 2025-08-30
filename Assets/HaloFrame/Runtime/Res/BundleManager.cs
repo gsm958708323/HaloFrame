@@ -42,7 +42,7 @@ namespace HaloFrame
         {
             this.offset = offset;
             this.bundleRootDir = bundleRootDir;
-            string manifestFile = Path.Combine(bundleRootDir, PathTools.Platform);
+            string manifestFile = Path.Combine(bundleRootDir, Path.GetFileNameWithoutExtension(PathTools.MainManifestFile));
             AssetBundle assetBundle = AssetBundle.LoadFromFile(manifestFile);
             var objests = assetBundle.LoadAllAssets();
             if (objests.Length == 0)

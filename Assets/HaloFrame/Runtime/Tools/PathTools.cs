@@ -9,7 +9,14 @@ namespace HaloFrame
         public const string AssetBundlesDir = "AssetBundles";
         public static string HotUpdateDir = "HotUpdate";
         public static string BuildSettingPath = "Assets/Resources/BuildSetting.asset";
-        public static string AssetMapFileName = "AssetMap.json";
+        /// <summary>
+        /// 资源映射文件
+        /// </summary>
+        public static string AssetMapFile = "AssetMap.json";
+        /// <summary>
+        /// ab包主文件，可以获取ab包的依赖关系
+        /// </summary>
+        public static string MainManifestFile = "main.manifest";
 
         private static string streamingAssetsPath;
         public static string StreamingAssetsPath

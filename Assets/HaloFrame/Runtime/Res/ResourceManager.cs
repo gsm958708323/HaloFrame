@@ -24,7 +24,7 @@ namespace HaloFrame
             if (isEditor)
                 return;
 
-            var assetMapPath = Path.Combine(bundleRootDir, "..", PathTools.AssetMapFileName);
+            var assetMapPath = Path.Combine(bundleRootDir, "..", PathTools.AssetMapFile);
             assetInfoDict = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(assetMapPath));
 
             BundleManager.Instance.Init(bundleRootDir, offset);
