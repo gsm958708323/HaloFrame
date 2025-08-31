@@ -8,7 +8,8 @@ namespace HaloFrame
     {
         public const string AssetBundlesDir = "AssetBundles";
         public static string HotUpdateDir = "HotUpdate";
-        public static string BuildSettingPath = "Assets/Resources/BuildSetting.asset";
+        public static string BuildSettingPath = "Assets/BuildSetting.asset";
+        public static string GameVersionFile = "GameVersion.json";
         /// <summary>
         /// 资源映射文件
         /// </summary>
@@ -18,42 +19,46 @@ namespace HaloFrame
         /// </summary>
         public static string MainManifestFile = "main.manifest";
 
-        private static string streamingAssetsPath;
-        public static string StreamingAssetsPath
+        private static string remoteABUrlPrefix;
+        /// <summary>
+        /// 下载abUrl的前缀
+        /// </summary>
+        /// <value></value>
+        public static string RemoteABUrlPrefix
         {
             get
             {
-                if (string.IsNullOrEmpty(streamingAssetsPath))
+                if (string.IsNullOrEmpty(remoteABUrlPrefix))
                 {
-                    streamingAssetsPath = Path.Combine(Application.streamingAssetsPath, AssetBundlesDir, Platform).Replace("\\", "/");
+                    remoteABUrlPrefix = PathTools.Combine(GameConfig.HotUpdateAddress, PathTools.Platform, PathTools.HotUpdateVersionDir);
                 }
-                return streamingAssetsPath;
+                return remoteABUrlPrefix;
             }
         }
 
-        private static string remoteAddress;
-        public static string RemoteAddress
+        private static string downloadABPathPrefix;
+        public static string DownloadABPathPrefix
         {
             get
             {
-                if (string.IsNullOrEmpty(remoteAddress))
+                if (string.IsNullOrEmpty(downloadABPathPrefix))
                 {
-                    remoteAddress = Path.Combine(GameConfig.LocalVersion.AssetRemoteAddress, AssetBundlesDir, Platform).Replace("\\", "/");
+                    downloadABPathPrefix = PathTools.Combine(Application.persistentDataPath, "HotUpdate");
                 }
-                return remoteAddress;
+                return downloadABPathPrefix;
             }
         }
 
-        private static string hotUpdatePath;
-        public static string HotUpdatePath
+        private static string hotUpdateVersionDir;
+        public static string HotUpdateVersionDir
         {
             get
             {
-                if (string.IsNullOrEmpty(hotUpdatePath))
+                if (string.IsNullOrEmpty(hotUpdateVersionDir))
                 {
-                    hotUpdatePath = Path.Combine(Application.persistentDataPath, HotUpdateDir, AssetBundlesDir, Platform).Replace("\\", "/");
+                    hotUpdateVersionDir = $"{HotUpdateDir}_{GameConfig.RemoteVersion}";
                 }
-                return hotUpdatePath;
+                return hotUpdateVersionDir;
             }
         }
 

@@ -13,9 +13,5 @@ namespace HaloFrame
         public string Version;
         public string Md5;
         public long Size;
-        /// <summary>
-        /// 是否需要更更新
-        /// </summary>
-        public bool Update;
     }
 }

@@ -43,9 +43,7 @@ public class Download : MonoBehaviour
         var version = "HotUpdate_1.0.0";
         var url = PathTools.Combine(path1, PathTools.Platform, version, file);
 
-        int index = file.IndexOf('/');
-        string fileName = file.Substring(index + 1);
-        var downPath = PathTools.Combine(Application.persistentDataPath, "HotUpdate", fileName);
+        var downPath = PathTools.Combine(Application.persistentDataPath, "HotUpdate", file);
         Debugger.Log($"下载位置：{downPath}");
         download.AddDownloadTask(url, downPath);
         download.LaunchDownload();

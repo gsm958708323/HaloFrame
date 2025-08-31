@@ -7,7 +7,5 @@ namespace HaloFrame
     {
         public string Version;
         public string AssetRemoteAddress;
-        public bool EnableHotUpdate;
-        public List<string> HotUpdateVersion;
     }
 }

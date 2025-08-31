@@ -52,11 +52,7 @@ namespace HaloFrame
         /// <param name="callback">获取完成后的回调函数。</param>
         public void GetUriFileSizeAsync(string downloadUri, Action<long> callback)
         {
-            if (string.IsNullOrEmpty(downloadUri))
-            {
-                Debugger.LogError("Url为空");
-                return;
-            }
+            Utility.Text.IsStringValid(downloadUri, "URI is invalid !");
             if (callback == null)
                 throw new ArgumentNullException("Callback is invalid !");
             downloadRequester.GetUriFileSizeAsync(downloadUri, callback);
@@ -69,11 +65,7 @@ namespace HaloFrame
         /// <param name="callback">获取完成后的回调函数。</param>
         public void GetUrlFilesSizeAsync(string downloadUrl, Action<long> callback)
         {
-            if (string.IsNullOrEmpty(downloadUrl))
-            {
-                Debugger.LogError("Url为空");
-                return;
-            }
+            Utility.Text.IsStringValid(downloadUrl, "URI is invalid !");
             var relUris = downloadUrlHelper.ParseUrlToRelativeUris(downloadUrl);
             downloadRequester.GetUriFilesSizeAsync(relUris, callback);
         }

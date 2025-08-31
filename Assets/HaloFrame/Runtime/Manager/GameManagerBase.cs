@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -26,6 +27,10 @@ namespace HaloFrame
             managerLinked = new();
             InitFrame();
             InitManager();
+        }
+
+        protected virtual IEnumerator Start() {
+            yield break;
         }
 
         void InitFrame()

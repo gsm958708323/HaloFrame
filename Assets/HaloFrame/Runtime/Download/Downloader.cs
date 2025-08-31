@@ -141,16 +141,6 @@ namespace HaloFrame
         /// </summary>
         bool canDownload;
 
-        /// <summary>
-        /// 总共需要下载的文件大小
-        /// </summary>
-        long totalRequirementDownloadLength;
-
-        /// <summary>
-        /// 已经下载的文件大小
-        /// </summary>
-        long completedDownloadLength;
-
         public Downloader()
         {
             pendingTasks = new List<DownloadTask>();
@@ -167,7 +157,7 @@ namespace HaloFrame
         /// <param name="downloadByteOffset">下载偏移字节。</param>
         /// <param name="downloadAppend">是否追加下载。</param>
         /// <returns>新添加的下载任务的唯一标识符。</returns>
-        public long AddDownload(string downloadUri, string downloadPath, long downloadByteOffset = 0, bool downloadAppend = false)
+        public long AddDownloadTask(string downloadUri, string downloadPath, long downloadByteOffset = 0, bool downloadAppend = false)
         {
             Utility.Text.IsStringValid(downloadUri, "URI is invalid !");
             Utility.Text.IsStringValid(downloadPath, "DownloadPath is invalid !");
@@ -432,12 +422,6 @@ namespace HaloFrame
                 unityWebRequest?.Abort();
             else
                 unityWebRequest?.Dispose();
-            //foreach (var task in pendingTasks)
-            //{
-            //    var completedInfo = new DownloadCompletedInfo(task.URI, task.DownloadPath, 0, TimeSpan.Zero);
-            //    failedInfos.Add(completedInfo);
-            //}
-            //todo 这里需要将pending列表中的任务变更为下载失败
             pendingTasks.Clear();
             pendingTaskDict.Clear();
             downloadTaskCount = 0;

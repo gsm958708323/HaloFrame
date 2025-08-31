@@ -112,7 +112,7 @@ namespace HaloFrame
             /// <param name="folderName">子文件夹名称</param>
             public static void CreateFolder(string path, string folderName)
             {
-                var fullPath = Path.Combine(path, folderName);
+                var fullPath = PathTools.Combine(path, folderName);
                 var dir = new DirectoryInfo(fullPath);
                 if (!dir.Exists)
                 {
@@ -151,7 +151,7 @@ namespace HaloFrame
             /// <returns>合并的路径</returns>
             public static string PathCombine(params string[] paths)
             {
-                var resultPath = Path.Combine(paths);
+                var resultPath = PathTools.Combine(paths);
                 resultPath = resultPath.Replace("/", "\\");
                 return resultPath;
             }
@@ -162,7 +162,7 @@ namespace HaloFrame
             /// <returns>合并的路径</returns>
             public static string CombineURL(params string[] paths)
             {
-                var pathResult = Path.Combine(paths);
+                var pathResult = PathTools.Combine(paths);
                 pathResult = pathResult.Replace("\\", "/");
                 return pathResult;
             }
@@ -185,7 +185,7 @@ namespace HaloFrame
             /// <returns>合并的路径</returns>
             public static string CombineUNCPath(params string[] paths)
             {
-                var resultPath = Path.Combine(paths);
+                var resultPath = PathTools.Combine(paths);
                 resultPath = resultPath.Replace("/", "\\");
                 return resultPath;
             }
@@ -237,7 +237,7 @@ namespace HaloFrame
                     {
                         Directory.CreateDirectory(folderPath);
                     }
-                    var destFileName = Path.Combine(folderPath, fileName);
+                    var destFileName = PathTools.Combine(folderPath, fileName);
                     File.Copy(sourceFileName, destFileName, overwrite);
                 }
             }
@@ -281,7 +281,7 @@ namespace HaloFrame
                 //复制所有文件到新地址
                 foreach (FileInfo fi in source.GetFiles())
                 {
-                    fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+                    fi.CopyTo(PathTools.Combine(target.FullName, fi.Name), true);
                 }
                 //递归拷贝所有子目录
                 foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
@@ -338,7 +338,7 @@ namespace HaloFrame
                     using (FileStream fs = File.Create(oldFileFullPath)) { }
                 }
                 var dirPath = Path.GetDirectoryName(oldFileFullPath);
-                var newFileName = Path.Combine(dirPath, newFileNamewithExtension);
+                var newFileName = PathTools.Combine(dirPath, newFileNamewithExtension);
                 if (File.Exists(newFileName))
                     File.Delete(newFileName);
                 File.Move(oldFileFullPath, newFileName);
@@ -401,7 +401,7 @@ namespace HaloFrame
             {
                 if (!Directory.Exists(folderPath))
                     throw new IOException("ReadTextFileContent folder path not exist !" + folderPath);
-                return ReadTextFileContent(Path.Combine(folderPath, fileName));
+                return ReadTextFileContent(PathTools.Combine(folderPath, fileName));
             }
             /// <summary>
             /// 使用UTF8编码
@@ -416,7 +416,7 @@ namespace HaloFrame
             {
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
-                using (FileStream stream = new FileStream(Path.Combine(filePath, fileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (FileStream stream = new FileStream(PathTools.Combine(filePath, fileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     stream.Position = stream.Length;
                     using (StreamWriter writer = new StreamWriter(stream, utf8Encoding))
@@ -463,7 +463,7 @@ namespace HaloFrame
             {
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
-                using (FileStream stream = File.Open(Path.Combine(filePath, fileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (FileStream stream = File.Open(PathTools.Combine(filePath, fileName), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     if (append)
                         stream.Position = stream.Length;
@@ -584,7 +584,7 @@ namespace HaloFrame
             {
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
-                var fileFullPath = Path.Combine(filePath, fileName);
+                var fileFullPath = PathTools.Combine(filePath, fileName);
                 using (FileStream stream = File.Open(fileFullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     stream.Seek(0, SeekOrigin.Begin);
@@ -648,7 +648,7 @@ namespace HaloFrame
             {
                 if (!Directory.Exists(filePath))
                     Directory.CreateDirectory(filePath);
-                var fullFilePath = Path.Combine(filePath, fileName);
+                var fullFilePath = PathTools.Combine(filePath, fileName);
                 using (FileStream stream = new FileStream(fullFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();

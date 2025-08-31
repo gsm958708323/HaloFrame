@@ -590,7 +590,7 @@ namespace HaloFrame
                     }
                     if (copy)
                     {
-                        string temppath = Path.Combine(destDirName, file.Name);
+                        string temppath = PathTools.Combine(destDirName, file.Name);
                         file.CopyTo(temppath, true);
                     }
                 }
@@ -599,7 +599,7 @@ namespace HaloFrame
                 {
                     foreach (DirectoryInfo subdir in dirs)
                     {
-                        string temppath = Path.Combine(destDirName, subdir.Name);
+                        string temppath = PathTools.Combine(destDirName, subdir.Name);
                         SafeCopyDirectory(subdir.FullName, temppath, copySubDirs);
                     }
                 }

@@ -11,24 +11,30 @@ public class GameManager : GameManagerBase
     public static Dispatcher Dispatcher;
     public static UIManager UI;
     public static ResourceManager Resource;
+    public static HotUpdateManger HotUpdate;
+    public static DownloadManager Download;
 
-    protected override void InitManager()
+    protected override IEnumerator Start()
     {
-        base.InitManager();
-
         Dispatcher = GetManager<Dispatcher>();
+        Download = GetManager<DownloadManager>();
+        HotUpdate = GetManager<HotUpdateManger>();
+        yield return HotUpdate.ReqRemote();
+        HotUpdate.StarHotUpdate();
+
         Resource = GetManager<ResourceManager>();
         InitResource();
         Driver = GetManager<DriverManager>();
         RedDot = GetManager<RedDotManager>();
         UI = GetManager<UIManager>();
+        yield break;
     }
 
     void InitResource()
     {
         string platform = PathTools.Platform;
         // todo 改成沙盒目录
-        var bundleRootDir = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde\Windows\HotUpdate_1.0.0".Replace("\\", "/");
+        var bundleRootDir = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde\Windows\HotUpdate_1.0.1".Replace("\\", "/");
         bool isEditorMode = PlayerPrefs.GetInt("IsEditorMode", 1) == 1;
         Resource.Init(bundleRootDir, isEditorMode);
     }

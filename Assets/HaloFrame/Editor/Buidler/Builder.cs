@@ -88,17 +88,22 @@ namespace HaloFrame
 
             //搜集bundle信息
             ms_CollectProfiler.Start();
-            Dictionary<string, List<string>> bundleDic = Collect();
+            var tupleInfo = Collect();
             ms_CollectProfiler.Stop();
+
+            //生成资源映射文件
+            ms_GenerateManifestProfiler.Start();
+            GenerateResMap(tupleInfo.Item1, tupleInfo.Item2, tupleInfo.Item3, false);
+            ms_GenerateManifestProfiler.Stop();
 
             //打包assetbundle
             ms_BuildBundleProfiler.Start();
-            BuildBundle(hotUpdateBuildPath, bundleDic);
+            BuildBundle(hotUpdateBuildPath, tupleInfo.Item2);
             ms_BuildBundleProfiler.Stop();
 
             //清空多余文件
             ms_ClearBundleProfiler.Start();
-            ClearAssetBundle(hotUpdateBuildPath, bundleDic);
+            ClearAssetBundle(hotUpdateBuildPath, tupleInfo.Item2);
             ms_ClearBundleProfiler.Stop();
 
             EditorUtility.ClearProgressBar();
@@ -110,32 +115,36 @@ namespace HaloFrame
 
         public static void BuildUpdate()
         {
-            var path = PathTools.Combine(buildSettingsSO.buildRoot, PathTools.AssetMapFile);
-            if (!File.Exists(path))
-            {
-                Debugger.LogError("未生成资源文件，请先打包游戏！");
-                return;
-            }
-
-
             ms_BuildProfiler.Start();
             ms_LoadBuildSettingProfiler.Start();
             buildSettingsSO = LoadSettingSO(PathTools.BuildSettingPath);
             ms_LoadBuildSettingProfiler.Stop();
 
+            var path = PathTools.Combine(buildPath, PathTools.AssetMapFile);
+            if (!File.Exists(path))
+            {
+                Debugger.LogError($"未生成资源文件，请先打包游戏！ {path}");
+                return;
+            }
+
             //搜集bundle信息
             ms_CollectProfiler.Start();
-            Dictionary<string, List<string>> bundleDic = Collect(true);
+            var tupleInfo = Collect();
             ms_CollectProfiler.Stop();
+
+            //生成资源映射文件
+            ms_GenerateManifestProfiler.Start();
+            GenerateResMap(tupleInfo.Item1, tupleInfo.Item2, tupleInfo.Item3, true);
+            ms_GenerateManifestProfiler.Stop();
 
             //打包assetbundle
             ms_BuildBundleProfiler.Start();
-            BuildBundle(hotUpdateBuildPath, bundleDic);
+            BuildBundle(hotUpdateBuildPath, tupleInfo.Item2);
             ms_BuildBundleProfiler.Stop();
 
             //清空多余文件
             ms_ClearBundleProfiler.Start();
-            ClearAssetBundle(hotUpdateBuildPath, bundleDic);
+            ClearAssetBundle(hotUpdateBuildPath, tupleInfo.Item2);
             ms_ClearBundleProfiler.Stop();
 
             EditorUtility.ClearProgressBar();
@@ -149,7 +158,8 @@ namespace HaloFrame
         /// 搜集打包bundle的信息
         /// </summary>
         /// <returns></returns>
-        private static Dictionary<string, List<string>> Collect(bool buildHotUpdate = false)
+        private static Tuple<Dictionary<string, EResourceType>, Dictionary<string, List<string>>, Dictionary<string, List<string>>>
+        Collect()
         {
             //获取所有在打包设置的文件列表
             ms_CollectBuildSettingFileProfiler.Start();
@@ -185,12 +195,7 @@ namespace HaloFrame
             Dictionary<string, List<string>> bundleDic = CollectBundleSO(buildSettingsSO, assetDic, dependencyDic);
             ms_CollectBundleProfiler.Stop();
 
-            //生成资源映射文件
-            ms_GenerateManifestProfiler.Start();
-            GenerateResMap(assetDic, bundleDic, dependencyDic, buildHotUpdate);
-            ms_GenerateManifestProfiler.Stop();
-
-            return bundleDic;
+            return Tuple.Create(assetDic, bundleDic, dependencyDic);
         }
 
         /// <summary>
@@ -348,8 +353,23 @@ namespace HaloFrame
                 };
                 assetMap.Add(resName, info);
             }
-            UpdateResMap(assetMap, buildHotUpdate);
 
+            var version = new GameVersion()
+            {
+                Version = buildSettingsSO.version,
+                AssetRemoteAddress = buildSettingsSO.remoteAddress,
+            };
+            var versionJson = JsonTools.ToJson(version);
+            FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.GameVersionFile), versionJson);
+            var assetMapJson = JsonTools.ToJson(assetMap);
+            FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.AssetMapFile), assetMapJson);
+
+            if (!buildHotUpdate)
+            {
+                // 打首包时，生成版本文件放到resources目录下,方便获取远端地址
+                FileTools.SafeWriteAllText(PathTools.Combine(Application.dataPath, "Resources", PathTools.GameVersionFile), versionJson);
+                FileTools.SafeWriteAllText(PathTools.Combine(Application.dataPath, "Resources", PathTools.AssetMapFile), assetMapJson);
+            }
 
             AssetDatabase.Refresh();
 
@@ -357,34 +377,7 @@ namespace HaloFrame
 
             EditorUtility.ClearProgressBar();
         }
-
-        public static void UpdateResMap(Dictionary<string, AssetInfo> assetMap, bool buildHotUpdate = false)
-        {
-            if (!buildHotUpdate)
-            {
-                var assetMapJson = JsonTools.ToJson(assetMap);
-                FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.AssetMapFile), assetMapJson);
-            }
-            else
-            {
-                var path = PathTools.Combine(buildPath, PathTools.AssetMapFile);
-                var oldAssetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(path));
-                foreach (var mapItem in assetMap)
-                {
-                    oldAssetMap.TryGetValue(mapItem.Key, out var oldAssetInfo);
-                    var assetInfo = mapItem.Value;
-                    if (oldAssetInfo is null || oldAssetInfo.Md5 != assetInfo.Md5)
-                    {
-                        // 新增或md5不一致则需要热更
-                        assetInfo.Update = true;
-                    }
-                }
-
-                var assetMapJson = JsonTools.ToJson(assetMap);
-                FileTools.SafeWriteAllText(PathTools.Combine(buildPath, PathTools.AssetMapFile), assetMapJson);
-            }
-        }
-
+        
         /// <summary>
         /// 打包AssetBundle
         /// <param name="assetDic">资源列表</param>
@@ -469,11 +462,11 @@ namespace HaloFrame
             var suffix = Path.GetExtension(PathTools.MainManifestFile);
 
             var dirName = $"{PathTools.HotUpdateDir}_{buildSettingsSO.version}";
-            var file1 = Path.Combine(path, dirName);
-            FileTools.SafeRenameFile(file1, Path.Combine(path, prefix));
+            var file1 = PathTools.Combine(path, dirName);
+            FileTools.SafeRenameFile(file1, PathTools.Combine(path, prefix));
 
-            var file2 = Path.Combine(path, dirName + suffix);
-            FileTools.SafeRenameFile(file2, Path.Combine(path, PathTools.MainManifestFile));
+            var file2 = PathTools.Combine(path, dirName + suffix);
+            FileTools.SafeRenameFile(file2, PathTools.Combine(path, PathTools.MainManifestFile));
         }
 
         /// <summary>

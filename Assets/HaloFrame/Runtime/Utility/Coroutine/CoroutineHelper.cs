@@ -141,7 +141,7 @@ namespace HaloFrame
             if (delayTaskDict.TryRemove(taskId, out var task))
             {
                 delayTaskList.Remove(task);
-                ReferencePool.Clear(task);
+                ReferencePool.Release(task);
             }
         }
         /// <summary>
@@ -153,7 +153,7 @@ namespace HaloFrame
             if (conditionTaskDict.TryRemove(taskId, out var task))
             {
                 conditionTaskList.Remove(task);
-                ReferencePool.Clear(task);
+                ReferencePool.Release(task);
             }
         }
         public void StopAllDelayTask()
@@ -162,7 +162,7 @@ namespace HaloFrame
             for (int i = 0; i < length; i++)
             {
                 var task = delayTaskList[i];
-                ReferencePool.Clear(task);
+                ReferencePool.Release(task);
             }
             delayTaskList.Clear();
             delayTaskDict.Clear();
@@ -173,7 +173,7 @@ namespace HaloFrame
             for (int i = 0; i < length; i++)
             {
                 var task = conditionTaskList[i];
-                ReferencePool.Clear(task);
+                ReferencePool.Release(task);
             }
             conditionTaskList.Clear();
             conditionTaskDict.Clear();
@@ -206,7 +206,7 @@ namespace HaloFrame
             if (coroutineActionTaskDict.Remove(taskId, out var coroutineTask))
             {
                 coroutineActionTaskList.Remove(coroutineTask);
-                ReferencePool.Clear(coroutineTask);
+                ReferencePool.Release(coroutineTask);
             }
         }
         /// <summary>
@@ -223,7 +223,7 @@ namespace HaloFrame
             for (int i = 0; i < length; i++)
             {
                 var coroutineTask = coroutineActionTaskList[i];
-                ReferencePool.Clear(coroutineTask);
+                ReferencePool.Release(coroutineTask);
             }
             coroutineActionTaskDict.Clear();
             coroutineActionTaskList.Clear();
@@ -332,7 +332,7 @@ namespace HaloFrame
                 routineList.RemoveAt(0);
                 var coroutine = StartCoroutine(task.Enumerator);
                 task.Callback?.Invoke(coroutine);
-                ReferencePool.Clear(task);
+                ReferencePool.Release(task);
             }
         }
         void RefreshDelayTask()
@@ -421,7 +421,7 @@ namespace HaloFrame
                 var coroutineTask = coroutineActionTaskList[0];
                 coroutineActionTaskList.RemoveAt(0);
                 yield return coroutineTask.Task();
-                ReferencePool.Clear(coroutineTask);
+                ReferencePool.Release(coroutineTask);
             }
             runningCoroutineTask = false;
         }

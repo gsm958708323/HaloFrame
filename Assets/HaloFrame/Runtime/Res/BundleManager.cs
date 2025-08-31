@@ -42,7 +42,7 @@ namespace HaloFrame
         {
             this.offset = offset;
             this.bundleRootDir = bundleRootDir;
-            string manifestFile = Path.Combine(bundleRootDir, Path.GetFileNameWithoutExtension(PathTools.MainManifestFile));
+            string manifestFile = PathTools.Combine(bundleRootDir, Path.GetFileNameWithoutExtension(PathTools.MainManifestFile));
             AssetBundle assetBundle = AssetBundle.LoadFromFile(manifestFile);
             var objests = assetBundle.LoadAllAssets();
             if (objests.Length == 0)
@@ -176,7 +176,7 @@ namespace HaloFrame
         /// <returns></returns>
         internal string GetFileUrl(string url)
         {
-            return Path.Combine(bundleRootDir, url);
+            return PathTools.Combine(bundleRootDir, url);
         }
     }
 }
