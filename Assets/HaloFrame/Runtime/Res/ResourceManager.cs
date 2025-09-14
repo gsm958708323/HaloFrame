@@ -1,16 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace HaloFrame
 {
     public class ResourceManager : IManager
     {
         private bool isEditor;
-        Dictionary<string, AssetInfo> assetInfoDict;
         Dictionary<string, AResource> resourceDict;
         List<AResourceAsync> asyncList;
         LinkedList<AResource> waitUnloadList;
@@ -23,9 +19,6 @@ namespace HaloFrame
             this.isEditor = isEditor;
             if (isEditor)
                 return;
-
-            var assetMapPath = PathTools.Combine(bundleRootDir, "..", PathTools.AssetMapFile);
-            assetInfoDict = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(assetMapPath));
 
             BundleManager.Instance.Init(bundleRootDir, offset);
         }
@@ -216,7 +209,7 @@ namespace HaloFrame
 
         public AssetInfo GetAssetInfo(string assetUrl)
         {
-            assetInfoDict.TryGetValue(assetUrl, out AssetInfo info);
+            GameConfig.RemoteAssetMap.TryGetValue(assetUrl, out AssetInfo info);
             return info;
         }
     }

@@ -81,6 +81,13 @@ namespace HaloFrame
         {
             FileTools.SafeDeleteDir(buildRoot);
         }
+        [BoxGroup("按钮")]
+        [HorizontalGroup("按钮/第二行")]
+        [Button("删除沙盒目录")]
+        public void DeletePersistentPath()
+        {
+            FileTools.SafeDeleteDir(Application.persistentDataPath);
+        }
 
         [HideInInspector]
         public Dictionary<string, BuildItem> itemDic = new();

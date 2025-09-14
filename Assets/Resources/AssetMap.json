@@ -1,1 +1,88 @@
-{"Assets/HaloFrame/Samples/UI/Prefabs/ButtonItem.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/buttonitem.prefab.ab","Version":"1.0.0","Md5":"78c8c967d4517e017fd89ede5560b1dd","Size":7444},"Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/childview1.prefab.ab","Version":"1.0.0","Md5":"99d447041f30433a03e5a2fd8a6a3f3a","Size":5073},"Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/childview2.prefab.ab","Version":"1.0.0","Md5":"3b2bac66a63a6cace8a005e0dfcb601e","Size":11184},"Assets/HaloFrame/Samples/UI/Prefabs/ChildView3.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/childview3.prefab.ab","Version":"1.0.0","Md5":"548c90fe38aa7ea34f7e5ae6f26b1d64","Size":5080},"Assets/HaloFrame/Samples/UI/Prefabs/ChildView4.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/childview4.prefab.ab","Version":"1.0.0","Md5":"31fc32fbc86401b493a5b3214d5070ee","Size":5079},"Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab":{"Dependency":["Assets/HaloFrame/Samples/UI/Prefabs/ButtonItem.prefab"],"ABUrl":"assets/haloframe/samples/ui/prefabs/fullview1.prefab.ab","Version":"1.0.0","Md5":"9d4e5f38dfd4a354a8262019eadb18be","Size":19112},"Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/fullview2.prefab.ab","Version":"1.0.0","Md5":"242b183383aa2fc2b37696793c3d8229","Size":12011},"Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/fullview2_top.prefab.ab","Version":"1.0.0","Md5":"03149ac728d3d3b18c3e4d43aee2763a","Size":12005},"Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/tipsview1.prefab.ab","Version":"1.0.0","Md5":"50d30136b0f404fda4ce7b59bd1d51f8","Size":12010},"Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/prefabs/tipsview2.prefab.ab","Version":"1.0.0","Md5":"9a7e926d7c32c9b7a0c4184be8e7ced6","Size":12039},"Assets/HaloFrame/Samples/UI/Config/ResConfig.asset":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/config/resconfig.asset.ab","Version":"1.0.0","Md5":"b9dbfcd5c95b11dac9a665cea0b1afcf","Size":1241},"Assets/HaloFrame/Samples/UI/Config/UIConfig.asset":{"Dependency":[],"ABUrl":"assets/haloframe/samples/ui/config/uiconfig.asset.ab","Version":"1.0.0","Md5":"47f1474c2f0d9793bffa8c1be017384e","Size":7838}}
+{
+    "Assets/HaloFrame/Samples/UI/Prefabs/ButtonItem.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/buttonitem.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 7444
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/ChildView1.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/childview1.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 5073
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/ChildView2.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/childview2.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 11184
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/ChildView3.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/childview3.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 5080
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/ChildView4.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/childview4.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 5079
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/FullView1.prefab": {
+        "Dependency": [
+            "Assets/HaloFrame/Samples/UI/Prefabs/ButtonItem.prefab"
+        ],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/fullview1.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 19111
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/FullView2.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/fullview2.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 12012
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/FullView2_Top.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/fullview2_top.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 12005
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/TipsView1.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/tipsview1.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 12010
+    },
+    "Assets/HaloFrame/Samples/UI/Prefabs/TipsView2.prefab": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/prefabs/tipsview2.prefab.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 12039
+    },
+    "Assets/HaloFrame/Samples/UI/Config/ResConfig.asset": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/config/resconfig.asset.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 1241
+    },
+    "Assets/HaloFrame/Samples/UI/Config/UIConfig.asset": {
+        "Dependency": [],
+        "ABUrl": "assets/haloframe/samples/ui/config/uiconfig.asset.ab",
+        "Version": "1.0.0",
+        "Md5": "",
+        "Size": 7838
+    }
+}

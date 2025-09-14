@@ -366,6 +366,12 @@ namespace HaloFrame
 
             if (!buildHotUpdate)
             {
+                // 玩家首次更新时要更新全部
+                foreach (var item in assetMap)
+                {
+                    item.Value.Md5 = "";
+                }
+                assetMapJson = JsonTools.ToJson(assetMap);
                 // 打首包时，生成版本文件放到resources目录下,方便获取远端地址
                 FileTools.SafeWriteAllText(PathTools.Combine(Application.dataPath, "Resources", PathTools.GameVersionFile), versionJson);
                 FileTools.SafeWriteAllText(PathTools.Combine(Application.dataPath, "Resources", PathTools.AssetMapFile), assetMapJson);

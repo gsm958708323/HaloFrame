@@ -20,23 +20,17 @@ public class GameManager : GameManagerBase
         Download = GetManager<DownloadManager>();
         HotUpdate = GetManager<HotUpdateManger>();
         yield return HotUpdate.ReqRemote();
-        HotUpdate.StarHotUpdate();
+        HotUpdate.StarHotUpdate(EnterGame);
+    }
 
+    void EnterGame()
+    {
         Resource = GetManager<ResourceManager>();
-        InitResource();
+        Resource.Init(PathTools.DownloadABPathPrefix, PlayerPrefs.GetInt("IsEditorMode", 1) == 1);
+
         Driver = GetManager<DriverManager>();
         RedDot = GetManager<RedDotManager>();
         UI = GetManager<UIManager>();
-        yield break;
-    }
-
-    void InitResource()
-    {
-        string platform = PathTools.Platform;
-        // todo 改成沙盒目录
-        var bundleRootDir = @"D:\Work\Blog\HaloFrame\Build\AssetBunlde\Windows\HotUpdate_1.0.1".Replace("\\", "/");
-        bool isEditorMode = PlayerPrefs.GetInt("IsEditorMode", 1) == 1;
-        Resource.Init(bundleRootDir, isEditorMode);
     }
 
     /*

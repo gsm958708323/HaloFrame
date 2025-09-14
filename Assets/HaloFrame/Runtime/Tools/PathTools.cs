@@ -19,6 +19,31 @@ namespace HaloFrame
         /// </summary>
         public static string MainManifestFile = "main.manifest";
 
+        private static string localGameVersionPath;
+        public static string LocalGameVersionPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(localGameVersionPath))
+                {
+                    localGameVersionPath = PathTools.Combine(Application.persistentDataPath, PathTools.Platform, PathTools.GameVersionFile);
+                }
+                return localGameVersionPath;
+            }
+        }
+        private static string localAssetMapPath;
+        public static string LocalAssetMapPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(localAssetMapPath))
+                {
+                    localAssetMapPath = PathTools.Combine(Application.persistentDataPath, PathTools.Platform, PathTools.AssetMapFile);
+                }
+                return localAssetMapPath;
+            }
+        }
+
         private static string remoteABUrlPrefix;
         /// <summary>
         /// 下载abUrl的前缀
@@ -37,13 +62,17 @@ namespace HaloFrame
         }
 
         private static string downloadABPathPrefix;
+        /// <summary>
+        /// 本地存储ab的路径（不存储多版本资源）
+        /// </summary>
+        /// <value></value>
         public static string DownloadABPathPrefix
         {
             get
             {
                 if (string.IsNullOrEmpty(downloadABPathPrefix))
                 {
-                    downloadABPathPrefix = PathTools.Combine(Application.persistentDataPath, "HotUpdate");
+                    downloadABPathPrefix = PathTools.Combine(Application.persistentDataPath, PathTools.Platform, PathTools.HotUpdateDir);
                 }
                 return downloadABPathPrefix;
             }

@@ -9,6 +9,7 @@ namespace HaloFrame
 {
     public class HotUpdateManger : IManager
     {
+        public Action hotUpdateFinishCB;
         Downloader downloader;
 
         public override void Init()
@@ -40,42 +41,46 @@ namespace HaloFrame
             {
                 Debugger.Log($"所有热更资源获取完成！，用时：{eventArgs.TimeSpan}", LogDomain.HotUpdate);
                 UpdateRemoteToLocal();
+                hotUpdateFinishCB?.Invoke();
             };
         }
 
         public override void Enter()
         {
             // 尝试从本地沙盒目录获取本地版本,没有则读取resources下的版本
-            var versionFile = PathTools.Combine(Application.persistentDataPath, PathTools.Platform, PathTools.GameVersionFile);
+            var versionFile = PathTools.LocalGameVersionPath;
             GameVersion gameVersion;
             if (File.Exists(versionFile))
             {
-                var version = JsonTools.ToObject<GameVersion>(FileTools.SafeReadAllText(versionFile));
-                gameVersion = version;
+                gameVersion = JsonTools.ToObject<GameVersion>(FileTools.SafeReadAllText(versionFile));
             }
             else
             {
                 var versionAsset = Resources.Load<TextAsset>(Path.GetFileNameWithoutExtension(PathTools.GameVersionFile));
                 gameVersion = JsonTools.ToObject<GameVersion>(versionAsset.ToString());
             }
+            Debugger.Log($"获取本地游戏版本 {gameVersion}");
             GameConfig.LocalVersion = gameVersion.Version;
             GameConfig.HotUpdateAddress = gameVersion.AssetRemoteAddress;
 
-            var assetMapFile = PathTools.Combine(Application.persistentDataPath, PathTools.Platform, PathTools.AssetMapFile);
+            var assetMapFile = PathTools.LocalAssetMapPath;
+            Dictionary<string, AssetInfo> assetMap;
             if (File.Exists(assetMapFile))
             {
-                var assetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(assetMapFile));
-                GameConfig.LocalAssetMap = assetMap;
+                assetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(FileTools.SafeReadAllText(assetMapFile));
             }
             else
             {
-                var assetMap = Resources.Load<TextAsset>(Path.GetFileNameWithoutExtension(PathTools.AssetMapFile));
-                GameConfig.LocalAssetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(assetMap.ToString());
+                var assetMapJson = Resources.Load<TextAsset>(Path.GetFileNameWithoutExtension(PathTools.AssetMapFile));
+                assetMap = JsonTools.ToObject<Dictionary<string, AssetInfo>>(assetMapJson.ToString());
             }
+            GameConfig.LocalAssetMap = assetMap;
+            GameConfig.RemoteAssetMap = assetMap; // 版本号相同时，给个默认值
         }
 
         public IEnumerator ReqRemote()
         {
+            // todo 超时重新请求
             var remoteVersionFile = PathTools.Combine(GameConfig.HotUpdateAddress, PathTools.Platform, PathTools.GameVersionFile);
             Debugger.Log($"请求远端资源版本 {remoteVersionFile}", LogDomain.HotUpdate);
             using (UnityWebRequest request = UnityWebRequest.Get(remoteVersionFile))
@@ -115,6 +120,14 @@ namespace HaloFrame
 
         public Tuple<HashSet<AssetInfo>, long> CheckHotUpdate()
         {
+            var hotSet = new HashSet<AssetInfo>();
+            long hotSize = 0;
+            var result = CompareVersion(GameConfig.LocalVersion, GameConfig.RemoteVersion);
+            if (result == 0)
+            {
+                return Tuple.Create(hotSet, hotSize);
+            }
+
             if (GameConfig.RemoteAssetMap is null)
             {
                 Debugger.LogError($"热更失败：资源映射文件不存在");
@@ -126,13 +139,6 @@ namespace HaloFrame
                 return null;
             }
 
-            var hotSet = new HashSet<AssetInfo>();
-            long hotSize = 0;
-            var result = CompareVersion(GameConfig.LocalVersion, GameConfig.RemoteVersion);
-            if (result == 0)
-            {
-                return Tuple.Create(hotSet, hotSize);
-            }
             foreach (var item in GameConfig.RemoteAssetMap)
             {
                 GameConfig.LocalAssetMap.TryGetValue(item.Key, out var localInfo);
@@ -152,6 +158,12 @@ namespace HaloFrame
 
         int CompareVersion(string version1, string version2)
         {
+            // 首次进入没有游戏配置需要更新
+            if (!File.Exists(PathTools.LocalGameVersionPath))
+            {
+                return -1;
+            }
+
             var arr1 = version1.Split('.');
             var arr2 = version2.Split('.');
 
@@ -173,11 +185,17 @@ namespace HaloFrame
             return 0;
         }
 
-        public void StarHotUpdate()
+        public void StarHotUpdate(Action finishCB)
         {
+            hotUpdateFinishCB = finishCB;
             var info = CheckHotUpdate();
             if (info is null)
             {
+                return;
+            }
+            if (info.Item1.Count == 0)
+            {
+                hotUpdateFinishCB?.Invoke();
                 return;
             }
 
@@ -190,12 +208,29 @@ namespace HaloFrame
                 downloader.AddDownloadTask(remoteUrl, downPath);
             }
 
+            var mainFile = Path.GetFileNameWithoutExtension(PathTools.MainManifestFile);
+            var remoteMainUrl = PathTools.Combine(PathTools.RemoteABUrlPrefix, mainFile);
+            var downMainPath = PathTools.Combine(PathTools.DownloadABPathPrefix, mainFile);
+            downloader.AddDownloadTask(remoteMainUrl, downMainPath);
+
             downloader.LaunchDownload();
         }
 
         void UpdateRemoteToLocal()
         {
-
+            if (GameConfig.RemoteVersion is not null)
+            {
+                var remoteVersion = new GameVersion
+                {
+                    Version = GameConfig.RemoteVersion,
+                    AssetRemoteAddress = GameConfig.HotUpdateAddress
+                };
+                FileTools.SafeWriteAllText(PathTools.LocalGameVersionPath, JsonTools.ToJson(remoteVersion));
+            }
+            if (GameConfig.RemoteAssetMap is not null)
+            {
+                FileTools.SafeWriteAllText(PathTools.LocalAssetMapPath, JsonTools.ToJson(GameConfig.RemoteAssetMap));
+            }
         }
     }
 }
