@@ -99,7 +99,7 @@ namespace HaloFrame
             // 如果当前版本相同，则不进行更新
             if (result == 0)
             {
-                Debugger.Log("版本号相同，不要更新", LogDomain.HotUpdate);
+                Debugger.Log("版本号相同，不用更新", LogDomain.HotUpdate);
                 yield break;
             }
             var remoteAssetMapFile = PathTools.Combine(GameConfig.HotUpdateAddress, PathTools.Platform, PathTools.AssetMapFile);
